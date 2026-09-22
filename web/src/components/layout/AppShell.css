@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) 12px calc(20px + env(safe-area-inset-left, 0px));
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
@@ -172,7 +172,7 @@
 /* Main Content Area */
 .main-content {
   flex: 1;
-  padding-bottom: 90px; /* Space for mobile nav */
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); /* Space for mobile nav */
   width: 100%;
 }
 
@@ -180,9 +180,9 @@
 .bottom-nav {
   display: flex;
   position: fixed;
-  bottom: 12px;
-  left: 16px;
-  right: 16px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  left: calc(16px + env(safe-area-inset-left, 0px));
+  right: calc(16px + env(safe-area-inset-right, 0px));
   height: 64px;
   justify-content: space-around;
   align-items: center;
