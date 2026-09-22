@@ -7,18 +7,18 @@
 | Field | Value |
 |---|---|
 | Last updated | 2026-09-23 |
-| Branch | `feat/expo-ios-migration` (synced to `main`) |
-| Commit | `d94d0c2` (chore(branding): rename app from Sattva to Pratha) |
+| Branch | `main` |
+| Commit | `acafbf9` (chore(expo): update EAS projectId for Pratha) |
 | Working tree | Clean |
-| Current phase | Cross-platform migration and final polish |
-| Overall status | Fully functional React Web App, Android App, and iOS Bridge |
+| Current phase | Feature Complete & Maintenance |
+| Overall status | Fully functional React Web App, Android App, and iOS Bridge. EAS Cloud Build is verified. |
 
 ---
 
 ## 2. READ THIS FIRST
 
 **Product Description:** Pratha (formerly Sattva) is a digital sanctuary app offering remote Vedic rituals (Pujas), Gaushala interactions (cow adoption/feeding), Seva (donations), and AI-guided spiritual assistance (Rishi).
-**Current State:** The core Web application (React+Vite) has been fully implemented, integrated with Firebase Auth & Firestore, and bundled natively into Android (via Capacitor) and iOS (via Expo DOM Components). The branding was just successfully renamed from Sattva to Pratha across all files, configurations, and Git remotes.
+**Current State:** The core Web application (React+Vite) has been fully implemented, integrated with Firebase Auth & Firestore, and bundled natively into Android (via Capacitor) and iOS (via Expo DOM Components). The branding was successfully renamed from Sattva to Pratha across all files. EAS Simulator build profiling is successfully linked and verified.
 **What's Next:** There is no active implementation task. The application is in a stable state ready for distribution.
 **Critical Constraints:** DO NOT rewrite the React DOM application into React Native primitives. The iOS build specifically relies on Expo SDK 57's `"use dom"` component architecture (`PrathaDomBridge.tsx`) to render the existing web app in-memory on iOS.
 
