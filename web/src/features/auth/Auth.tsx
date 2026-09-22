@@ -34,7 +34,15 @@ export function Auth() {
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to sign in with Google');
+      let errorMsg = 'Failed to sign in with Google.';
+      if (err.code === 'auth/popup-closed-by-user' || err.message?.includes('12501')) {
+        errorMsg = 'Sign-in cancelled.';
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMsg = 'Network error. Please check your internet connection.';
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -63,7 +71,29 @@ export function Auth() {
       }
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please verify credentials.');
+      let errorMsg = 'Authentication failed. Please try again.';
+      if (err.code) {
+        switch (err.code) {
+          case 'auth/invalid-credential':
+            errorMsg = 'Incorrect email or password.';
+            break;
+          case 'auth/user-not-found':
+            errorMsg = 'No account found with this email.';
+            break;
+          case 'auth/email-already-in-use':
+            errorMsg = 'This email is already registered. Please sign in.';
+            break;
+          case 'auth/weak-password':
+            errorMsg = 'Password is too weak. Must be at least 6 characters.';
+            break;
+          case 'auth/network-request-failed':
+            errorMsg = 'Network error. Please check your internet connection.';
+            break;
+          default:
+            errorMsg = err.message || errorMsg;
+        }
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
