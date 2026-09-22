@@ -365,7 +365,7 @@ export function Profile() {
 
           <button className="btn-signout" onClick={signOut}>
             <LogOut size={16} />
-            <span>Sign Out of Sattva Sanctuary</span>
+            <span>Sign Out of Pratha Sanctuary</span>
           </button>
         </div>
       )}

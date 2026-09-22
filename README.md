@@ -23,7 +23,7 @@ Built with **Kotlin Multiplatform (KMP)**, **Compose Multiplatform UI**, and pow
 graph TD
     subgraph Client ["Mobile Client (Kotlin Multiplatform)"]
         UI[Compose Multiplatform UI]
-        VM[SattvaViewModel / State Management]
+        VM[PrathaViewModel / State Management]
         Room[(Room Database Cache)]
         Ktor[Ktor HTTP Client]
         Native[Android Native: Firebase Auth & FCM]
@@ -102,15 +102,15 @@ graph TD
 ### Running the Android App
 
 > [!IMPORTANT]
-> Always open the **root repository folder** (`/Sattva`) in Android Studio — do **not** open the `androidApp/` subfolder directly.
+> Always open the **root repository folder** (`/Pratha`) in Android Studio — do **not** open the `androidApp/` subfolder directly.
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/marvelpokemaster/Sattva.git
-   cd Sattva
+   git clone https://github.com/marvelpokemaster/Pratha.git
+   cd Pratha
    ```
 2. **Open in Android Studio**:
-   * Select **File** → **Open...** → choose the `Sattva` root directory.
+   * Select **File** → **Open...** → choose the `Pratha` root directory.
    * Allow Gradle to sync.
 3. **Run**:
    * Select **`androidApp`** in the run configurations dropdown.

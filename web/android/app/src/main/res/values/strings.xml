@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Sattva</string>
-    <string name="title_activity_main">Sattva</string>
+    <string name="app_name">Pratha</string>
+    <string name="title_activity_main">Pratha</string>
     <string name="package_name">com.utsavam.sattva</string>
     <string name="custom_url_scheme">com.utsavam.sattva</string>
 </resources>

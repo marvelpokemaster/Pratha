@@ -18,7 +18,7 @@ export function RishiChatModal({ isOpen, onClose, initialPrompt }: RishiChatModa
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hari Om, Devotee. I am Rishi, your Vedic spiritual guide at Sattva. How may I illuminate your journey of devotion, sanctuary seva, or auspicious timing today?'
+      content: 'Hari Om, Devotee. I am Rishi, your Vedic spiritual guide at Pratha. How may I illuminate your journey of devotion, sanctuary seva, or auspicious timing today?'
     }
   ]);
   const [input, setInput] = useState('');

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Sattva",
-    "slug": "sattva",
+    "name": "Pratha",
+    "slug": "pratha",
     "version": "1.0.3",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -12,7 +12,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.utsavam.sattva"
+      "bundleIdentifier": "com.utsavam.sattva",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.utsavam.sattva",
@@ -20,6 +23,11 @@
     },
     "web": {
       "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "58f0829b-ad6e-45c8-9c54-7419f7597b05"
+      }
     }
   }
 }

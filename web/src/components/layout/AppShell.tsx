@@ -21,7 +21,7 @@ export function AppShell() {
       <header className="app-header">
         <NavLink to="/" className="brand-badge">
           <span className="brand-om">ॐ</span>
-          <span className="brand-title">SATTVA</span>
+          <span className="brand-title">PRATHA</span>
         </NavLink>
 
         <div className="header-actions">
@@ -46,7 +46,7 @@ export function AppShell() {
         <div className="desktop-brand">
           <div className="flex items-center gap-2">
             <span className="brand-om">ॐ</span>
-            <span className="brand-title">SATTVA</span>
+            <span className="brand-title">PRATHA</span>
           </div>
           <p className="desktop-brand-motto">धर्मो रक्षति रक्षितः</p>
         </div>

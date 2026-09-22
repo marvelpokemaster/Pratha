@@ -1,12 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import SattvaDomBridge from './src/SattvaDomBridge';
+import PrathaDomBridge from './src/PrathaDomBridge';
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" backgroundColor="#1E1B18" />
-      <SattvaDomBridge 
+      <PrathaDomBridge 
         initialRoute="/"
         dom={{
           scrollEnabled: true,

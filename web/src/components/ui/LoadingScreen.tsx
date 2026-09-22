@@ -8,7 +8,7 @@ interface LoadingScreenProps {
 
 export function LoadingScreen({ 
   message = "Entering Sacred Space...", 
-  subtext = "Connecting with Sattva Sanctuaries",
+  subtext = "Connecting with Pratha Sanctuaries",
   fullScreen = true 
 }: LoadingScreenProps) {
   return (

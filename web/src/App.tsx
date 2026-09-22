@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <LoadingScreen message="Restoring Sacred Session..." subtext="Connecting to Sattva" />;
+    return <LoadingScreen message="Restoring Sacred Session..." subtext="Connecting to Pratha" />;
   }
   
   if (!user) {
@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 export const queryClient = new QueryClient();
 
-export function SattvaAppContent() {
+export function PrathaAppContent() {
   return (
     <Routes>
       <Route path="/login" element={<Auth />} />
@@ -58,12 +58,15 @@ export function SattvaAppContent() {
   );
 }
 
+// Backward-compatible alias
+export const SattvaAppContent = PrathaAppContent;
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-          <SattvaAppContent />
+          <PrathaAppContent />
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
