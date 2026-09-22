@@ -1,169 +1,102 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Heart, ShieldCheck, ArrowRight, Award, Sparkles, Utensils } from 'lucide-react';
-import { getWelfareStats } from '@/lib/api/gaushala';
+import { HeartHandshake, Leaf, ShieldCheck, Activity, Users, ArrowRight } from 'lucide-react';
 import { IMAGES } from '@/lib/images';
 import { DonationModal } from './DonationModal';
-import './Seva.css';
+import { motion } from 'motion/react';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 export function SevaExperience() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedInitiative, setSelectedInitiative] = useState('Monsoon Green Fodder & Hay');
-  const [selectedAmount, setSelectedAmount] = useState(501);
 
-  const { data: stats } = useQuery({
-    queryKey: ['welfareStats'],
-    queryFn: () => getWelfareStats(),
-  });
-
-  const totalCows = stats?.totalRescued || 450;
-
-  const initiatives = [
-    {
-      id: 'fodder',
-      title: 'Monsoon Green Fodder & Nutritious Hay',
-      price: 501,
-      priceLabel: '₹501 / Day',
-      image: IMAGES.seva.fodderMonsoon,
-      desc: 'Provide fresh green hybrid Napier grass, organic jaggery, and dry sorghum stalks to nourish the cows during seasonal rains.',
-      impact: 'Feeds 15 cows for an entire day with high-nutrition roughage'
-    },
-    {
-      id: 'healing',
-      title: 'Veterinary Healing & Herbal Medicine',
-      price: 1101,
-      priceLabel: '₹1,101 / Course',
-      image: IMAGES.seva.healing,
-      desc: 'Support compassionate medical treatments, ayurvedic joint oils, sterile bandaging, and antibiotic care for injured or elderly resident cattle.',
-      impact: 'Full 7-day therapeutic recovery kit for one rescued resident'
-    },
-    {
-      id: 'sanctuary',
-      title: 'Sanctuary Shelter & Winter Bedding',
-      price: 2501,
-      priceLabel: '₹2,501 / Month',
-      image: IMAGES.seva.sanctuary,
-      desc: 'Maintain weather-proof shed roofing, clean drinking water borewells, organic dry straw bedding, and daily hawan mosquito repulsion.',
-      impact: 'Shelters 5 mother cows with dry bedding and clean ventilation'
-    }
-  ];
-
-  const handleOpenSeva = (initiativeTitle: string, defaultAmt: number) => {
-    setSelectedInitiative(initiativeTitle);
-    setSelectedAmount(defaultAmt);
-    setModalOpen(true);
-  };
+  const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
+  const itemVariants = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as any, stiffness: 300, damping: 24 } } };
 
   return (
-    <div className="seva-page">
-      {/* Seva Editorial Hero */}
-      <section className="seva-hero-banner">
-        <div className="flex items-center gap-2">
-          <span className="badge-gold">
-            <ShieldCheck size={13} />
-            Direct Sanctuary Offering
-          </span>
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-8 md:gap-12 pb-10">
+      
+      {/* Hero Section */}
+      <motion.section variants={itemVariants} className="relative rounded-[2rem] overflow-hidden bg-text-primary text-white p-8 md:p-12 shadow-2xl">
+        <div className="absolute inset-0 opacity-20">
+          <img src={IMAGES.animals.gauri} alt="Kapila Calf" className="w-full h-full object-cover" />
         </div>
-        <h1 className="typography-headline-lg">
-          Sacred Gau Seva Initiatives
-        </h1>
-        <p>
-          Every rupee offered flows directly into daily food, medical care, and shelter for {totalCows} rescued cows at Shri Krishna Gaushala.
-        </p>
-
-        <div className="flex flex-wrap gap-4 mt-2">
-          <button 
-            className="btn-primary"
-            onClick={() => handleOpenSeva('Monsoon Green Fodder & Hay', 1100)}
-          >
-            <Heart size={16} fill="currentColor" />
-            <span>Make a Contribution</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Initiatives List */}
-      <section className="seva-initiatives-list">
-        {initiatives.map((item) => (
-          <div key={item.id} className="seva-card">
-            <div className="seva-card-img-box">
-              <img src={item.image} alt={item.title} />
-            </div>
-
-            <div className="seva-card-content">
-              <div className="seva-card-header">
-                <h3 className="seva-card-title">{item.title}</h3>
-                <span className="seva-price-pill">{item.priceLabel}</span>
-              </div>
-
-              <p className="seva-card-desc">{item.desc}</p>
-
-              <div className="flex items-center gap-2 text-xs text-tulsi font-medium">
-                <Sparkles size={14} />
-                <span>Impact: {item.impact}</span>
-              </div>
-
-              <div className="seva-card-footer">
-                <span className="text-xs text-muted">Direct to Gaushala Ledger</span>
-                <button 
-                  className="btn-secondary"
-                  onClick={() => handleOpenSeva(item.title, item.price)}
-                >
-                  <span>Contribute</span>
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-text-primary via-text-primary/80 to-transparent" />
+        
+        <div className="relative z-10 flex flex-col items-start gap-4">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+            <HeartHandshake size={14} /> Sanctuary Seva
           </div>
+          
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold max-w-2xl leading-tight">
+            Nourish the Divine. Sustain the Sanctuary.
+          </h1>
+          <p className="text-white/80 text-lg max-w-xl leading-relaxed mb-4">
+            Your monthly contribution directly provides green fodder, medical supplies, and shelter for over 450 rescued indigenous cows at our Vrindavan sanctum.
+          </p>
+          
+          <Button onClick={() => setModalOpen(true)} className="bg-white text-text-primary hover:bg-white/90 rounded-full px-8 py-6 text-[15px] font-bold shadow-xl flex items-center gap-2 group">
+            Sponsor Green Fodder <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </div>
+      </motion.section>
+
+      {/* Impact Stats */}
+      <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          { icon: Leaf, title: 'Fresh Green Fodder', desc: 'Sourced daily from local organic farmers to ensure optimal nutrition.', val: '1,200kg Daily' },
+          { icon: Activity, title: 'Medical Care', desc: '24/7 on-site veterinary support for injured and elderly cows.', val: '45+ Treated/Wk' },
+          { icon: Users, title: 'Community', desc: 'Providing livelihood to local Brajwasi caretakers and farmers.', val: '12 Caretakers' },
+        ].map((stat, i) => (
+          <Card key={i} className="p-6 md:p-8 flex flex-col gap-4 border-none shadow-md bg-surface">
+            <div className="w-12 h-12 rounded-full bg-tulsi-light text-tulsi flex items-center justify-center">
+              <stat.icon size={24} />
+            </div>
+            <div>
+              <h3 className="font-serif text-2xl font-bold text-text-primary mb-1">{stat.val}</h3>
+              <h4 className="font-semibold text-[15px] text-text-primary mb-2">{stat.title}</h4>
+              <p className="text-sm text-text-secondary leading-relaxed">{stat.desc}</p>
+            </div>
+          </Card>
         ))}
-      </section>
+      </motion.section>
 
-      {/* Trust & Transparency Guarantee */}
-      <section className="trust-guarantee-panel">
-        <div className="trust-item">
-          <div className="trust-icon-box">
-            <ShieldCheck size={20} />
-          </div>
-          <div>
-            <h4 className="trust-text-title">Direct Sanctuary Allocation</h4>
-            <p className="trust-text-desc">
-              All contributions directly support daily green fodder, veterinary medical kits, and shelter maintenance.
-            </p>
-          </div>
+      {/* Seva Packages */}
+      <motion.section variants={itemVariants} className="flex flex-col gap-6">
+        <div className="flex flex-col items-center text-center gap-2 mb-2">
+          <h2 className="font-serif text-3xl font-semibold text-text-primary">Choose Your Seva</h2>
+          <p className="text-text-secondary">Select a contribution that resonates with your devotion.</p>
         </div>
 
-        <div className="trust-item">
-          <div className="trust-icon-box">
-            <Award size={20} />
-          </div>
-          <div>
-            <h4 className="trust-text-title">Digital Offering Receipts</h4>
-            <p className="trust-text-desc">
-              Receive an instant digital receipt and contribution reference recorded in your Devotee Profile.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { name: '1 Day Fodder Seva', price: 1100, desc: 'Provide fresh green fodder and jaggery to 11 cows for a day.', icon: Leaf },
+            { name: 'Medical Seva', price: 2100, desc: 'Support the medical treatment of injured or elderly cows.', icon: Activity },
+            { name: '1 Month Adoption', price: 5100, desc: 'Take complete responsibility for one cow for an entire month.', icon: ShieldCheck, featured: true },
+          ].map((pkg, i) => (
+            <Card key={i} className={`relative flex flex-col p-6 md:p-8 transition-transform hover:-translate-y-1 hover:shadow-xl ${pkg.featured ? 'border-terracotta shadow-lg ring-1 ring-terracotta' : 'border-border'}`}>
+              {pkg.featured && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                  Most Preferred
+                </div>
+              )}
+              <div className={`w-12 h-12 rounded-full mb-4 flex items-center justify-center ${pkg.featured ? 'bg-terracotta-light text-terracotta' : 'bg-surface-subtle text-text-secondary'}`}>
+                <pkg.icon size={24} />
+              </div>
+              <h3 className="font-serif text-xl font-semibold text-text-primary mb-2">{pkg.name}</h3>
+              <p className="text-sm text-text-secondary leading-relaxed flex-1 mb-6">{pkg.desc}</p>
+              
+              <div className="flex items-center justify-between mt-auto">
+                <span className="font-serif font-bold text-2xl text-text-primary">₹{pkg.price}</span>
+                <Button onClick={() => setModalOpen(true)} variant={pkg.featured ? 'default' : 'outline'} className="rounded-full">
+                  Donate
+                </Button>
+              </div>
+            </Card>
+          ))}
         </div>
+      </motion.section>
 
-        <div className="trust-item">
-          <div className="trust-icon-box">
-            <Utensils size={20} />
-          </div>
-          <div>
-            <h4 className="trust-text-title">Resident Care Updates</h4>
-            <p className="trust-text-desc">
-              Follow regular sanctuary welfare updates and recovery progress for sheltered resident cattle.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Contribution Modal */}
-      <DonationModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        defaultInitiative={selectedInitiative}
-        defaultAmount={selectedAmount}
-      />
-    </div>
+      <DonationModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+    </motion.div>
   );
 }

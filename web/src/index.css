@@ -1,4 +1,29 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700&display=swap');
+
+@theme {
+  --color-terracotta: #B84A28;
+  --color-terracotta-hover: #9E3E20;
+  --color-terracotta-light: #FBF0EB;
+  --color-gold: #B8860B;
+  --color-gold-light: #FBF5E6;
+  --color-tulsi: #2D5A43;
+  --color-tulsi-light: #EBF3EE;
+  
+  --color-background: #F9F6F0;
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #F3ECE1;
+  --color-border: #E8DEC8;
+  --color-border-subtle: rgba(184, 134, 11, 0.15);
+
+  --color-text-primary: #1C1916;
+  --color-text-secondary: #5C5447;
+  --color-text-muted: #8A8072;
+
+  --font-serif: 'Libre Caslon Text', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mantra: 'Cinzel', 'Libre Caslon Text', serif;
+}
 
 :root {
   /* Sacred Vedic Palette - Light Mode */

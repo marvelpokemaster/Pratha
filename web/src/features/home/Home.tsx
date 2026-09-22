@@ -1,32 +1,23 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { ShieldCheck, HeartHandshake, Flame, MapPin, Sparkles, Sun, Clock, ArrowRight, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { 
-  Flame, 
-  MapPin, 
-  HeartHandshake, 
-  Sparkles, 
-  ArrowRight, 
-  Sun, 
-  ShieldCheck, 
-  Clock, 
-  Activity 
-} from 'lucide-react';
+import { RishiChatModal } from '@/features/ai/RishiChatModal';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 import { getPujas } from '@/lib/api/puja';
 import { getWelfareStats } from '@/lib/api/gaushala';
 import { IMAGES } from '@/lib/images';
-import { RishiChatModal } from '@/features/ai/RishiChatModal';
-import './Home.css';
+import { motion } from 'motion/react';
+import { Card } from '@/components/ui/Card';
 
 export function Home() {
-  const { user } = useAuth();
   const [rishiOpen, setRishiOpen] = useState(false);
-  const devoteeName = user?.displayName?.split(' ')[0] || 'Devotee';
+  const { user } = useAuth();
+  const devoteeName = user?.email?.split('@')[0] || 'Devotee';
 
   const { data: pujaData } = useQuery({
     queryKey: ['pujas'],
-    queryFn: () => getPujas(),
+    queryFn: () => getPujas({ filterBy: 'live' }),
   });
 
   const { data: welfareData } = useQuery({
@@ -48,207 +39,173 @@ export function Home() {
   const totalRescued = welfareData?.totalRescued || 450;
   const totalMeals = welfareData?.totalMealsServed || 13500;
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring' as any, stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="home-page">
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-6 md:gap-10 pb-10">
+      
       {/* Editorial Dawn Sanctuary Banner */}
-      <section className="home-hero-dawn">
-        <div className="hero-tag-row">
-          <span className="hero-subhead">सुप्रभातम् • शुभं भवतु</span>
-          <span className="badge-gold">
-            <ShieldCheck size={13} />
-            Vrindavan Sanctuary
+      <motion.section variants={itemVariants} className="flex flex-col gap-5 pt-2">
+        <div className="flex items-center gap-3">
+          <span className="font-mantra text-xs md:text-sm tracking-widest text-terracotta uppercase font-bold">
+            सुप्रभातम् • शुभं भवतु
           </span>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-border text-xs font-semibold text-text-secondary shadow-sm">
+            <ShieldCheck size={14} className="text-tulsi" />
+            Vrindavan Sanctuary
+          </div>
         </div>
 
-        <h1 className="hero-greeting">
-          Good Morning, {devoteeName}.
-        </h1>
-        <p className="hero-desc">
-          Step into today with peace. Connect with timeless rituals, nourish indigenous cattle, and invoke blessings for your family.
-        </p>
+        <div>
+          <h1 className="font-serif text-3xl md:text-5xl font-semibold text-text-primary mb-3">
+            Good Morning, <span className="text-terracotta">{devoteeName}</span>.
+          </h1>
+          <p className="text-text-secondary text-base md:text-lg leading-relaxed max-w-2xl">
+            Step into today with peace. Connect with timeless rituals, nourish indigenous cattle, and invoke blessings for your family.
+          </p>
+        </div>
 
-        <div className="hero-actions">
-          <Link to="/seva" className="btn-primary">
-            <HeartHandshake size={16} />
+        <div className="flex flex-wrap items-center gap-4 mt-2">
+          <Link to="/seva" className="flex items-center gap-2 bg-gradient-to-br from-terracotta to-[#A33C1D] text-white px-6 py-3 rounded-full font-semibold shadow-[0_4px_14px_rgba(184,74,40,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(184,74,40,0.35)] transition-all">
+            <HeartHandshake size={18} />
             <span>Sponsor Daily Fodder</span>
           </Link>
-          <Link to="/pujas" className="btn-secondary">
-            <Flame size={16} />
+          <Link to="/pujas" className="flex items-center gap-2 bg-surface hover:bg-surface-subtle border border-border text-text-primary px-6 py-3 rounded-full font-semibold transition-colors">
+            <Flame size={18} className="text-terracotta" />
             <span>Explore Pujas</span>
           </Link>
         </div>
-      </section>
+      </motion.section>
 
       {/* Quick Action Navigation Grid */}
-      <section className="quick-action-grid">
-        <Link to="/pujas" className="action-tile pujas">
-          <div className="action-icon-circle">
-            <Flame size={20} />
-          </div>
-          <div>
-            <h4 className="action-title">Book a Puja</h4>
-            <p className="action-caption">Varanasi, Ujjain, Tirupati</p>
-          </div>
-        </Link>
-
-        <Link to="/seva" className="action-tile seva">
-          <div className="action-icon-circle">
-            <HeartHandshake size={20} />
-          </div>
-          <div>
-            <h4 className="action-title">Gau Seva</h4>
-            <p className="action-caption">Green Fodder & Medicine</p>
-          </div>
-        </Link>
-
-        <Link to="/gaushala" className="action-tile gaushala">
-          <div className="action-icon-circle">
-            <MapPin size={20} />
-          </div>
-          <div>
-            <h4 className="action-title">Meet the Herd</h4>
-            <p className="action-caption">Shri Krishna Gaushala</p>
-          </div>
-        </Link>
-
-        <button className="action-tile rishi" onClick={() => setRishiOpen(true)}>
-          <div className="action-icon-circle">
+      <motion.section variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mt-4">
+        {[
+          { to: '/pujas', icon: Flame, title: 'Book a Puja', sub: 'Varanasi, Ujjain, Tirupati', color: 'text-terracotta', bg: 'bg-terracotta-light' },
+          { to: '/seva', icon: HeartHandshake, title: 'Gau Seva', sub: 'Green Fodder & Medicine', color: 'text-tulsi', bg: 'bg-tulsi-light' },
+          { to: '/gaushala', icon: MapPin, title: 'Meet the Herd', sub: 'Shri Krishna Gaushala', color: 'text-blue-600', bg: 'bg-blue-50' },
+        ].map((item, i) => (
+          <Link key={i} to={item.to} className="group flex flex-col gap-3 p-4 md:p-5 rounded-2xl bg-surface border border-border shadow-sm hover:shadow-md hover:border-border-subtle transition-all">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bg} ${item.color}`}>
+              <item.icon size={20} />
+            </div>
+            <div>
+              <h4 className="font-semibold text-[15px] text-text-primary">{item.title}</h4>
+              <p className="text-xs text-text-muted mt-0.5">{item.sub}</p>
+            </div>
+          </Link>
+        ))}
+        
+        <button onClick={() => setRishiOpen(true)} className="group flex flex-col gap-3 p-4 md:p-5 rounded-2xl bg-gradient-to-br from-surface to-gold-light/20 border border-[rgba(184,134,11,0.2)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gold-light text-[#9E6F05]">
             <Sparkles size={20} />
           </div>
           <div>
-            <h4 className="action-title">Rishi Vedic AI</h4>
-            <p className="action-caption">Vedic Guidance & Timing</p>
+            <h4 className="font-semibold text-[15px] text-[#9E6F05]">Rishi Vedic AI</h4>
+            <p className="text-xs text-[#9E6F05]/70 mt-0.5">Vedic Guidance & Timing</p>
           </div>
         </button>
-      </section>
+      </motion.section>
 
       {/* Rich Panchang Almanac Widget */}
-      <section className="panchang-card">
-        <div className="panchang-header">
-          <div className="panchang-title-group">
-            <Sun size={20} className="text-gold" />
-            <h3 className="font-serif text-lg font-semibold">Today's Vedic Panchang</h3>
+      <motion.section variants={itemVariants}>
+        <Card className="overflow-hidden border-border-subtle">
+          <div className="p-5 md:p-6 border-b border-border bg-surface flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Sun size={24} className="text-gold" />
+              <h3 className="font-serif text-xl font-semibold text-text-primary">Today's Vedic Panchang</h3>
+            </div>
+            <div className="hidden md:flex px-3 py-1 bg-tulsi-light text-tulsi rounded-full text-xs font-bold tracking-widest uppercase">
+              Margashirsha Maas
+            </div>
           </div>
-          <span className="badge-tulsi">
-            Margashirsha Maas
-          </span>
-        </div>
-
-        <div className="panchang-grid">
-          <div className="panchang-cell">
-            <div className="panchang-label">Tithi</div>
-            <div className="panchang-value">Shukla Ekadashi</div>
-            <div className="panchang-sub">Auspicious for Vishnu Pooja</div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-border bg-surface-subtle/50">
+            {[
+              { label: 'Tithi', val: 'Shukla Ekadashi', sub: 'Auspicious for Vishnu Pooja' },
+              { label: 'Nakshatra', val: 'Mrigashirsha', sub: 'Ruled by Soma • Gentle' },
+              { label: 'Auspicious Muhurat', val: 'Abhijit Muhurat', sub: '11:48 AM – 12:36 PM' },
+              { label: 'Surya Timings', val: 'Sunrise 06:28 AM', sub: 'Sunset 06:42 PM' }
+            ].map((p, i) => (
+              <div key={i} className="p-5 md:p-6 flex flex-col gap-1">
+                <span className="text-[11px] font-bold tracking-widest uppercase text-text-muted">{p.label}</span>
+                <span className="font-semibold text-text-primary text-[15px]">{p.val}</span>
+                <span className="text-xs text-text-secondary mt-1">{p.sub}</span>
+              </div>
+            ))}
           </div>
-
-          <div className="panchang-cell">
-            <div className="panchang-label">Nakshatra</div>
-            <div className="panchang-value">Mrigashirsha</div>
-            <div className="panchang-sub">Ruled by Soma • Gentle</div>
-          </div>
-
-          <div className="panchang-cell">
-            <div className="panchang-label">Auspicious Muhurat</div>
-            <div className="panchang-value">Abhijit Muhurat</div>
-            <div className="panchang-sub">11:48 AM – 12:36 PM</div>
-          </div>
-
-          <div className="panchang-cell">
-            <div className="panchang-label">Surya Timings</div>
-            <div className="panchang-value">Sunrise 06:28 AM</div>
-            <div className="panchang-sub">Sunset 06:42 PM</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sanctuary Impact Strip (Real Data) */}
-      <section className="impact-strip">
-        <div className="impact-col">
-          <div className="impact-icon-badge">
-            <ShieldCheck size={22} />
-          </div>
-          <div>
-            <div className="impact-stat">{totalRescued}</div>
-            <div className="impact-stat-label">Indigenous Cows Sheltered</div>
-          </div>
-        </div>
-
-        <div className="impact-col">
-          <div className="impact-icon-badge">
-            <Activity size={22} />
-          </div>
-          <div>
-            <div className="impact-stat">{totalMeals.toLocaleString()}+</div>
-            <div className="impact-stat-label">Sacred Meals Offered</div>
-          </div>
-        </div>
-
-        <div className="impact-col">
-          <div className="impact-icon-badge">
-            <Sparkles size={22} />
-          </div>
-          <div>
-            <div className="impact-stat">100%</div>
-            <div className="impact-stat-label">Direct Care Allocation</div>
-          </div>
-        </div>
-      </section>
+        </Card>
+      </motion.section>
 
       {/* Today's Featured Ritual */}
-      <section className="featured-ritual-box">
-        <div className="ritual-image-side">
-          <img 
-            src={IMAGES.rituals.kashiVishwanathAarti} 
-            alt={featuredPuja.title} 
-          />
-          <div className="ritual-badge-overlay">
-            <span className="pulse-indicator"></span>
-            <span>Featured Daily Aarti</span>
-          </div>
-        </div>
-
-        <div className="ritual-info-side">
-          <div>
-            <div className="ritual-meta-line">
-              <span className="flex items-center gap-1">
-                <MapPin size={14} className="text-terracotta" />
-                {featuredPuja.templeName}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Clock size={14} />
-                {featuredPuja.dateTimeStr}
-              </span>
+      <motion.section variants={itemVariants}>
+        <Card className="flex flex-col md:flex-row overflow-hidden shadow-sm hover:shadow-md transition-shadow group border-border">
+          <div className="relative md:w-2/5 aspect-[4/3] md:aspect-auto overflow-hidden bg-surface-subtle">
+            <img 
+              src={featuredPuja.templeName.includes("Varanasi") ? IMAGES.rituals.kashiVishwanathAarti : IMAGES.pujas.rudraAbhishekam} 
+              alt={featuredPuja.title} 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+            <div className="absolute top-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs font-semibold text-white tracking-wide">Featured Aarti</span>
             </div>
-
-            <h3 className="ritual-title">{featuredPuja.title}</h3>
-            <p className="ritual-desc">{featuredPuja.description}</p>
           </div>
 
-          <div className="ritual-bottom-row">
+          <div className="p-6 md:p-8 md:w-3/5 flex flex-col justify-between">
             <div>
-              <span className="text-xs text-muted block">Sankalpa Seva Dakshina</span>
-              <span className="ritual-price">₹{featuredPuja.priceRupees}</span>
+              <div className="flex items-center gap-3 text-xs font-semibold text-text-secondary uppercase tracking-widest mb-3 flex-wrap">
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={14} className="text-terracotta" />
+                  {featuredPuja.templeName}
+                </span>
+                <span className="text-border">•</span>
+                <span className="flex items-center gap-1.5">
+                  <Clock size={14} />
+                  {featuredPuja.dateTimeStr}
+                </span>
+              </div>
+
+              <h3 className="font-serif text-2xl md:text-3xl font-semibold text-text-primary mb-3">
+                {featuredPuja.title}
+              </h3>
+              <p className="text-text-secondary leading-relaxed mb-6">
+                {featuredPuja.description}
+              </p>
             </div>
 
-            <Link to="/pujas" className="btn-primary">
-              <span>Participate</span>
-              <ArrowRight size={16} />
-            </Link>
+            <div className="flex items-center justify-between pt-6 border-t border-border">
+              <div>
+                <span className="block text-xs font-medium text-text-muted uppercase tracking-wider mb-1">Sankalpa Dakshina</span>
+                <span className="text-xl font-bold text-text-primary">₹{featuredPuja.priceRupees}</span>
+              </div>
+
+              <Link to="/pujas" className="flex items-center gap-2 bg-surface hover:bg-surface-subtle text-text-primary border border-border px-5 py-2.5 rounded-full font-semibold transition-colors">
+                <span>Participate</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </Card>
+      </motion.section>
 
       {/* Daily Vedic Wisdom Shloka */}
-      <section className="wisdom-card">
-        <div className="wisdom-om">ॐ</div>
-        <h4 className="wisdom-sanskrit">गावो विश्वस्य मातरः</h4>
-        <p className="wisdom-trans">
+      <motion.section variants={itemVariants} className="text-center py-10 px-4">
+        <div className="w-12 h-12 mx-auto rounded-full bg-gold-light text-[#9E6F05] flex items-center justify-center font-serif text-2xl shadow-inner mb-6">ॐ</div>
+        <h4 className="font-mantra text-xl md:text-2xl font-bold text-text-primary tracking-widest mb-4">गावो विश्वस्य मातरः</h4>
+        <p className="text-text-secondary max-w-lg mx-auto italic font-serif leading-relaxed">
           "The Cow is the Mother of the cosmic universe — embodying unconditional sustenance, forgiveness, and universal motherly love."
         </p>
-      </section>
+      </motion.section>
 
       <RishiChatModal isOpen={rishiOpen} onClose={() => setRishiOpen(false)} />
-    </div>
+    </motion.div>
   );
 }

@@ -1,210 +1,147 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { MapPin, ShieldCheck, Award } from 'lucide-react';
-import { getGaushalas, getAnimals, type Gaushala, type Animal } from '@/lib/api/gaushala';
+import { getAnimals, type Animal } from '@/lib/api/gaushala';
+import { HeartHandshake, ShieldCheck, Stethoscope, Search, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { IMAGES } from '@/lib/images';
 import { CardSkeleton } from '@/components/ui/LoadingScreen';
-import './Gaushala.css';
+import { SponsorModal } from './SponsorModal';
+import { motion } from 'motion/react';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 export function GaushalaDiscovery() {
-  const { data: gaushalaData, isLoading: gaushalaLoading } = useQuery({
-    queryKey: ['gaushalas'],
-    queryFn: () => getGaushalas(),
+  const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [sponsorAnimal, setSponsorAnimal] = useState<Animal | null>(null);
+  const navigate = useNavigate();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['animals', filter],
+    queryFn: () => getAnimals(filter),
   });
 
-  const { data: animalData, isLoading: animalLoading } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAnimals(),
-  });
-
-  const defaultGaushala: Gaushala = {
-    id: 'shri_krishna_gaushala',
-    name: 'Shri Krishna Gaushala',
-    location: 'Vrindavan, Mathura District',
-    state: 'Uttar Pradesh',
-    imageUrl: IMAGES.seva.sanctuary,
-    animalsRescuedCount: 450,
-    trustScorePercent: 98,
-    transparencyTier: 'Gold Tier',
-    shelterPercent: 85,
-    fodderPercent: 65,
-    medicalPercent: 40,
-    missionQuote: 'Providing a lifelong, loving sanctuary and restorative herbal care for abandoned and injured cows.'
+  const getCuratedCowImage = (id: string, name: string) => {
+    if (name.toLowerCase().includes('nandi')) return IMAGES.animals.nandi;
+    if (name.toLowerCase().includes('kapila')) return IMAGES.animals.gauri;
+    if (name.toLowerCase().includes('surabhi')) return IMAGES.animals.nandini;
+    return IMAGES.animals.nandi; 
   };
-
-  const gaushala = gaushalaData?.gaushalas?.[0] || defaultGaushala;
 
   const defaultAnimals: Animal[] = [
-    {
-      id: 'nandi_01',
-      name: 'Nandi',
-      breed: 'Vechur / Desi',
-      ageStr: '3.5 Years',
-      healthStatus: 'Recovering',
-      healthDescription: 'Fractured left leg, healing with ayurvedic poultice.',
-      monthlyGoalRupees: 5000,
-      raisedRupees: 3250,
-      imageUrl: IMAGES.animals.nandi,
-      needsSupport: true,
-    },
-    {
-      id: 'nandini_02',
-      name: 'Nandini',
-      breed: 'Vechur Dwarf',
-      ageStr: '4.0 Years',
-      healthStatus: 'Healthy',
-      healthDescription: 'Gentle sanctuary mother, thriving on fresh green Napier grass.',
-      monthlyGoalRupees: 4000,
-      raisedRupees: 3800,
-      imageUrl: IMAGES.animals.nandini,
-      needsSupport: false,
-    },
-    {
-      id: 'gauri_03',
-      name: 'Gauri',
-      breed: 'Gir Cow',
-      ageStr: '5.2 Years',
-      healthStatus: 'Healthy',
-      healthDescription: 'Majestic horned Gir cow, fully adopted and flourishing.',
-      monthlyGoalRupees: 6000,
-      raisedRupees: 6000,
-      imageUrl: IMAGES.animals.gauri,
-      needsSupport: false,
-    }
+    { id: 'cow_nandi_01', name: 'Nandi (Sahiwal)', breed: 'Sahiwal', ageStr: '4 Years', imageUrl: IMAGES.animals.nandi, story: 'Rescued from highway traffic.'},
+    { id: 'cow_surabhi_02', name: 'Surabhi (Gir)', breed: 'Gir', ageStr: '6 Years', imageUrl: IMAGES.animals.nandini, story: 'Abandoned by dairy farmers.'},
+    { id: 'calf_kapila_03', name: 'Kapila', breed: 'Tharparkar', ageStr: '3 Months', imageUrl: IMAGES.animals.gauri, story: 'Found wandering near the forest edge.'},
   ];
 
-  const animals = (animalData?.animals && animalData.animals.length > 0) ? animalData.animals : defaultAnimals;
+  const animals = (data?.animals && data.animals.length > 0) ? data.animals : defaultAnimals;
+  const filtered = animals.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
 
-  const getCuratedAnimalImage = (a: Animal) => {
-    const name = (a.name || '').toLowerCase();
-    const id = (a.id || '').toLowerCase();
-    if (id.includes('nandini') || name.includes('nandini')) return IMAGES.animals.nandini;
-    if (id.includes('gauri') || name.includes('gauri')) return IMAGES.animals.gauri;
-    if (id.includes('nandi') || name.includes('nandi')) return IMAGES.animals.nandi;
-    return a.imageUrl?.startsWith('/images') ? a.imageUrl : IMAGES.animals.nandi;
-  };
+  const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
+  const itemVariants = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as any, stiffness: 300, damping: 24 } } };
 
   return (
-    <div className="gaushala-page">
-      {/* Featured Sanctuary Spotlight */}
-      <section className="sanctuary-spotlight-card">
-        <div className="sanctuary-hero-img-box">
-          <img 
-            src={gaushala.imageUrl || IMAGES.seva.sanctuary} 
-            alt={gaushala.name} 
-          />
-          <div className="sanctuary-badge-tag">
-            <ShieldCheck size={14} className="text-gold" />
-            <span>{gaushala.transparencyTier || 'Gold Tier'}</span>
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-6 md:gap-8 pb-10">
+      
+      <motion.section variants={itemVariants} className="flex flex-col gap-4 pt-4">
+        <div className="flex items-center gap-2">
+          <div className="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+            <ShieldCheck size={14} /> Certified Sanctuary
           </div>
         </div>
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-text-primary">
+          Meet the Rescued Herd
+        </h1>
+        <p className="text-text-secondary text-base md:text-lg leading-relaxed max-w-2xl">
+          Discover the unique stories of indigenous cows at Shri Krishna Gaushala. Sponsor their food, shelter, and medical care.
+        </p>
+      </motion.section>
 
-        <div className="sanctuary-details-body">
-          <div className="sanctuary-meta-row">
-            <span className="flex items-center gap-1 text-xs text-muted font-medium">
-              <MapPin size={13} className="text-terracotta" />
-              {gaushala.location || 'Vrindavan, Uttar Pradesh'}
-            </span>
-            <span className="badge-gold">
-              <Award size={12} />
-              {gaushala.trustScorePercent || 98}% Trust Score
-            </span>
-          </div>
-
-          <h2 className="sanctuary-title">{gaushala.name}</h2>
-
-          <p className="sanctuary-quote">
-            "{gaushala.missionQuote || 'Serving sacred cattle with lifelong devotion, organic fodder, and transparent veterinary welfare.'}"
-          </p>
-
-          {/* Transparency Breakdown Meters */}
-          <div className="transparency-breakdown">
-            <div className="transparency-meter">
-              <span className="meter-label">Shelter Capacity</span>
-              <div className="meter-bar-track">
-                <div className="meter-bar-fill" style={{ width: `${gaushala.shelterPercent || 85}%` }} />
-              </div>
-              <span className="meter-pct">{gaushala.shelterPercent || 85}% Fulfilled</span>
-            </div>
-
-            <div className="transparency-meter">
-              <span className="meter-label">Green Fodder</span>
-              <div className="meter-bar-track">
-                <div className="meter-bar-fill" style={{ width: `${gaushala.fodderPercent || 65}%` }} />
-              </div>
-              <span className="meter-pct">{gaushala.fodderPercent || 65}% Sourced</span>
-            </div>
-
-            <div className="transparency-meter">
-              <span className="meter-label">Medical Fund</span>
-              <div className="meter-bar-track">
-                <div className="meter-bar-fill" style={{ width: `${gaushala.medicalPercent || 40}%` }} />
-              </div>
-              <span className="meter-pct">{gaushala.medicalPercent || 40}% Funded</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Resident Cattle Herd Showcase */}
-      <div className="herd-section-header">
-        <div>
-          <span className="typography-label-sm text-terracotta">Resident Souls</span>
-          <h3 className="herd-section-title">Meet the Vrindavan Herd</h3>
-        </div>
-        <span className="text-xs text-muted">
-          {animals.length} Resident Cattle
-        </span>
-      </div>
-
-      <section className="herd-grid">
-        {(gaushalaLoading || animalLoading) && <CardSkeleton count={3} />}
-
-        {!gaushalaLoading && !animalLoading && animals.map((animal) => {
-          const raised = animal.raisedRupees || 3250;
-          const goal = animal.monthlyGoalRupees || 5000;
-          const pct = Math.min(100, Math.round((raised / goal) * 100));
-
-          return (
-            <Link 
-              to={`/gaushala/animal/${animal.id}`} 
-              key={animal.id} 
-              className="animal-card-compact"
+      <motion.section variants={itemVariants} className="sticky top-[72px] md:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border -mx-4 px-4 md:mx-0 md:px-0 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex overflow-x-auto hide-scrollbar gap-2">
+          {['All', 'Needs Medical', 'Calves', 'Sahiwal', 'Gir'].map((f) => (
+            <button
+              key={f}
+              className={cn(
+                "px-4 py-2 rounded-full text-[13px] font-semibold transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-terracotta border",
+                filter === f 
+                  ? "bg-text-primary text-white border-text-primary shadow-sm" 
+                  : "bg-surface border-border text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
+              )}
+              onClick={() => setFilter(f)}
             >
-              <div className="animal-thumb-box">
-                <img 
-                  src={getCuratedAnimalImage(animal)} 
-                  alt={animal.name} 
-                />
-                <span className={`animal-status-chip ${animal.healthStatus === 'Recovering' ? 'status-recovering' : 'status-healthy'}`}>
-                  {animal.healthStatus || 'Sanctuary Resident'}
-                </span>
-              </div>
+              {f}
+            </button>
+          ))}
+        </div>
+        
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <input 
+            type="text" 
+            placeholder="Search by name..." 
+            className="w-full md:w-64 bg-surface border border-border rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50 transition-shadow"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+      </motion.section>
 
-              <div className="animal-info-body">
-                <div className="flex items-center justify-between">
-                  <h4 className="animal-name">{animal.name}</h4>
-                  <span className="text-xs text-muted">{animal.breed || 'Desi'}</span>
+      <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mt-2">
+        {isLoading && <CardSkeleton count={6} />}
+        {!isLoading && filtered.map((animal) => (
+          <Card key={animal.id} className="flex flex-col overflow-hidden group hover:shadow-lg transition-all duration-300 hover:border-border-subtle cursor-pointer" onClick={() => navigate(`/gaushala/animal/${animal.id}`)}>
+            <div className="relative w-full aspect-[4/3] overflow-hidden bg-surface-subtle">
+              <motion.img 
+                layoutId={`img-${animal.id}`}
+                src={getCuratedCowImage(animal.id, animal.name)} 
+                alt={animal.name} 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              {animal.needsSupport && (
+                <div className="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-full shadow-lg" title="Requires Medical Attention">
+                  <Stethoscope size={16} />
                 </div>
+              )}
+            </div>
 
-                <p className="animal-sub-desc line-clamp-2">
-                  {animal.healthDescription || 'Loving resident cow residing at the Vrindavan sanctuary.'}
+            <div className="p-5 flex flex-col justify-between flex-1 gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="bg-surface-subtle text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">{animal.breed}</span>
+                  <span className="bg-surface-subtle text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">{animal.ageStr}</span>
+                </div>
+                
+                <motion.h3 layoutId={`name-${animal.id}`} className="font-serif text-xl font-semibold text-text-primary mb-1">
+                  {animal.name}
+                </motion.h3>
+                <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">
+                  {animal.story}
                 </p>
-
-                <div className="animal-progress-wrap">
-                  <div className="animal-progress-text">
-                    <span>Care Goal: ₹{raised} / ₹{goal}</span>
-                    <span className="font-semibold text-terracotta">{pct}%</span>
-                  </div>
-                  <div className="meter-bar-track">
-                    <div className="meter-bar-fill" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
               </div>
-            </Link>
-          );
-        })}
-      </section>
-    </div>
+
+              <div className="flex items-center gap-2 pt-4 border-t border-border mt-auto">
+                <Button 
+                  className="flex-1 rounded-xl"
+                  onClick={(e) => { e.stopPropagation(); setSponsorAnimal(animal); }}
+                >
+                  <HeartHandshake size={16} className="mr-1.5" /> Sponsor
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="rounded-xl px-4"
+                  onClick={(e) => { e.stopPropagation(); navigate(`/gaushala/animal/${animal.id}`); }}
+                >
+                  <Info size={18} />
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </motion.section>
+
+      <SponsorModal isOpen={!!sponsorAnimal} animal={sponsorAnimal} onClose={() => setSponsorAnimal(null)} />
+    </motion.div>
   );
 }

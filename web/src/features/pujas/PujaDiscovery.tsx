@@ -5,7 +5,10 @@ import { MapPin, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { IMAGES } from '@/lib/images';
 import { CardSkeleton } from '@/components/ui/LoadingScreen';
 import { PujaDetailModal } from './PujaDetailModal';
-import './Puja.css';
+import { motion } from 'motion/react';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 export function PujaDiscovery() {
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -18,7 +21,6 @@ export function PujaDiscovery() {
 
   const categories = ['All', 'Popular', 'Upcoming', 'Special', 'By Temple'];
 
-  // Rich fallback matching actual backend if network delay
   const defaultPujas: Puja[] = [
     {
       id: 'ganga_aarti_varanasi',
@@ -109,93 +111,121 @@ export function PujaDiscovery() {
     return p.imageUrl || IMAGES.pujas.templeHero;
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring' as any, stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="puja-page">
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-6 md:gap-8 pb-10">
+      
       {/* Editorial Sanctuary Header Banner */}
-      <section className="puja-header-banner">
+      <motion.section variants={itemVariants} className="flex flex-col gap-4 pt-4">
         <div className="flex items-center gap-2">
-          <span className="badge-gold">
-            <ShieldCheck size={13} />
-            Vedic Rituals & Archana
-          </span>
+          <div className="bg-gold-light text-[#9E6F05] px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-[rgba(184,134,11,0.2)]">
+            <ShieldCheck size={14} /> Vedic Rituals & Archana
+          </div>
         </div>
-        <h1 className="typography-headline-lg">Sacred Pujas & Rituals</h1>
-        <p>
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-text-primary">
+          Sacred Pujas & Rituals
+        </h1>
+        <p className="text-text-secondary text-base md:text-lg leading-relaxed max-w-2xl">
           Invoke divine grace through authentic temple ceremonies performed in your name and Gotra by revered priests across sacred sanctums.
         </p>
-      </section>
+      </motion.section>
 
       {/* Category Filter Pills */}
-      <section className="puja-filters-bar hide-scrollbar">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            className={`filter-chip-btn ${selectedCategory === cat ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(cat)}
-          >
-            {cat}
-          </button>
-        ))}
-      </section>
+      <motion.section variants={itemVariants} className="sticky top-[72px] md:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border -mx-4 px-4 md:mx-0 md:px-0 py-2">
+        <div className="flex overflow-x-auto hide-scrollbar gap-2 md:gap-3">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={cn(
+                "px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-terracotta border",
+                selectedCategory === cat 
+                  ? "bg-terracotta text-white border-terracotta shadow-md" 
+                  : "bg-surface border-border text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
+              )}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </motion.section>
 
       {/* Pujas List */}
-      <section className="pujas-grid">
+      <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mt-2">
         {isLoading && <CardSkeleton count={4} />}
 
         {!isLoading && filteredPujas.map((puja) => (
-          <div 
+          <Card 
             key={puja.id} 
-            className="puja-card"
+            className="flex flex-col overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 hover:border-border-subtle"
             onClick={() => setActivePuja(puja)}
           >
-            <div className="puja-card-img-box">
-              <img 
+            <div className="relative w-full aspect-[16/10] overflow-hidden bg-surface-subtle">
+              <motion.img 
+                layoutId={`image-${puja.id}`}
                 src={getCuratedPujaImage(puja)} 
                 alt={puja.title} 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               {puja.specialTag && (
-                <span className="puja-card-tag">
-                  {puja.specialTag}
-                </span>
+                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                  <span className="text-[10px] font-bold text-white uppercase tracking-widest">{puja.specialTag}</span>
+                </div>
               )}
             </div>
 
-            <div className="puja-card-body">
-              <div className="puja-location-text">
-                <MapPin size={13} className="text-terracotta" />
-                <span>{puja.templeName}</span>
-              </div>
-
-              <h3 className="puja-card-title">{puja.title}</h3>
-
-              {puja.priestName && (
-                <p className="puja-card-priest">
-                  <Sparkles size={13} className="text-gold" />
-                  <span>{puja.priestName} ({puja.priestTitle || 'Archaka'})</span>
-                </p>
-              )}
-
-              <div className="puja-card-footer">
-                <div>
-                  <span className="text-xs text-muted block">Sankalpa Dakshina</span>
-                  <span className="puja-dakshina-val">₹{puja.priceRupees}</span>
+            <div className="p-5 md:p-6 flex flex-col justify-between flex-1 gap-4">
+              <div>
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-widest mb-2.5">
+                  <MapPin size={13} className="text-terracotta" />
+                  <span>{puja.templeName}</span>
                 </div>
 
-                <button className="btn-book-puja" onClick={(e) => { e.stopPropagation(); setActivePuja(puja); }}>
+                <motion.h3 layoutId={`title-${puja.id}`} className="font-serif text-xl font-semibold text-text-primary mb-2 line-clamp-2">
+                  {puja.title}
+                </motion.h3>
+
+                {puja.priestName && (
+                  <p className="flex items-center gap-2 text-sm text-text-secondary mt-1">
+                    <Sparkles size={14} className="text-gold shrink-0" />
+                    <span className="truncate">{puja.priestName} ({puja.priestTitle || 'Archaka'})</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-border mt-auto">
+                <div>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-text-muted block mb-0.5">Sankalpa Dakshina</span>
+                  <span className="font-serif font-bold text-xl text-text-primary">₹{puja.priceRupees}</span>
+                </div>
+
+                <Button 
+                  onClick={(e) => { e.stopPropagation(); setActivePuja(puja); }}
+                  className="rounded-full px-5 gap-2"
+                >
                   <span>Book Puja</span>
-                  <ArrowRight size={14} />
-                </button>
+                  <ArrowRight size={16} />
+                </Button>
               </div>
             </div>
-          </div>
+          </Card>
         ))}
-      </section>
+      </motion.section>
 
       {/* Interactive Puja Details & Sankalpa Modal */}
       <PujaDetailModal 
         puja={activePuja} 
         onClose={() => setActivePuja(null)} 
       />
-    </div>
+    </motion.div>
   );
 }
