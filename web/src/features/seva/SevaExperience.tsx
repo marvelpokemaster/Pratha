@@ -13,17 +13,17 @@ export function SevaExperience() {
   const itemVariants = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as any, stiffness: 300, damping: 24 } } };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-8 md:gap-12 pb-10">
+    <motion.div variants={containerVariants} className="flex flex-col gap-8 md:gap-12 pb-10">
       
       {/* Hero Section */}
-      <motion.section variants={itemVariants} className="relative rounded-[2rem] overflow-hidden bg-text-primary text-white p-8 md:p-12 shadow-2xl">
+      <motion.section  className="relative rounded-[2rem] overflow-hidden bg-text-primary text-white p-8 md:p-12 shadow-2xl">
         <div className="absolute inset-0 opacity-20">
           <img src={IMAGES.animals.gauri} alt="Kapila Calf" className="w-full h-full object-cover" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-text-primary via-text-primary/80 to-transparent" />
         
         <div className="relative z-10 flex flex-col items-start gap-4">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <div className="bg-white/20 border border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
             <HeartHandshake size={14} /> Sanctuary Seva
           </div>
           
@@ -34,20 +34,20 @@ export function SevaExperience() {
             Your monthly contribution directly provides green fodder, medical supplies, and shelter for over 450 rescued indigenous cows at our Vrindavan sanctum.
           </p>
           
-          <Button onClick={() => setModalOpen(true)} className="bg-white text-text-primary hover:bg-white/90 rounded-full px-8 py-6 text-[15px] font-bold shadow-xl flex items-center gap-2 group">
+          <Button onClick={() => setModalOpen(true)} className="bg-white text-text-primary hover:bg-white/90 rounded-full px-8 py-6 text-[15px] font-bold  flex items-center gap-2 group">
             Sponsor Green Fodder <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </motion.section>
 
       {/* Impact Stats */}
-      <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <motion.section  className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           { icon: Leaf, title: 'Fresh Green Fodder', desc: 'Sourced daily from local organic farmers to ensure optimal nutrition.', val: '1,200kg Daily' },
           { icon: Activity, title: 'Medical Care', desc: '24/7 on-site veterinary support for injured and elderly cows.', val: '45+ Treated/Wk' },
           { icon: Users, title: 'Community', desc: 'Providing livelihood to local Brajwasi caretakers and farmers.', val: '12 Caretakers' },
         ].map((stat, i) => (
-          <Card key={i} className="p-6 md:p-8 flex flex-col gap-4 border-none shadow-md bg-surface">
+          <Card key={i} className="p-6 md:p-8 flex flex-col gap-4 border border-border shadow-none bg-surface">
             <div className="w-12 h-12 rounded-full bg-tulsi-light text-tulsi flex items-center justify-center">
               <stat.icon size={24} />
             </div>
@@ -61,7 +61,7 @@ export function SevaExperience() {
       </motion.section>
 
       {/* Seva Packages */}
-      <motion.section variants={itemVariants} className="flex flex-col gap-6">
+      <motion.section  className="flex flex-col gap-6">
         <div className="flex flex-col items-center text-center gap-2 mb-2">
           <h2 className="font-serif text-3xl font-semibold text-text-primary">Choose Your Seva</h2>
           <p className="text-text-secondary">Select a contribution that resonates with your devotion.</p>
@@ -73,7 +73,7 @@ export function SevaExperience() {
             { name: 'Medical Seva', price: 2100, desc: 'Support the medical treatment of injured or elderly cows.', icon: Activity },
             { name: '1 Month Adoption', price: 5100, desc: 'Take complete responsibility for one cow for an entire month.', icon: ShieldCheck, featured: true },
           ].map((pkg, i) => (
-            <Card key={i} className={`relative flex flex-col p-6 md:p-8 transition-transform hover:-translate-y-1 hover:shadow-xl ${pkg.featured ? 'border-terracotta shadow-lg ring-1 ring-terracotta' : 'border-border'}`}>
+            <Card key={i} className={`relative flex flex-col p-6 md:p-8 transition-transform hover:-translate-y-1 hover: ${pkg.featured ? 'border-terracotta shadow-lg ring-1 ring-terracotta' : 'border-border'}`}>
               {pkg.featured && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
                   Most Preferred

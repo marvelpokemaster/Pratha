@@ -102,29 +102,28 @@ export function Auth() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 md:p-8 bg-background overflow-hidden">
-      {/* Background Decor */}
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 md:p-8 bg-surface">
       <div 
-        className="absolute inset-0 z-0 opacity-15"
+        className="absolute inset-0 z-0 opacity-10"
         style={{
           backgroundImage: "url('/images/backgrounds/auth-bg.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent z-0" />
+      <div className="absolute inset-0 bg-surface/80 z-0" />
 
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative z-10 w-full max-w-[420px] bg-surface/95 backdrop-blur-xl border border-border rounded-[28px] shadow-2xl p-8 md:p-10"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative z-10 w-full max-w-[420px] bg-surface border border-border-subtle rounded-2xl p-8 md:p-10 shadow-sm"
       >
         <div className="text-center mb-8">
-          <div className="mx-auto w-14 h-14 rounded-full bg-gradient-to-br from-gold to-terracotta text-white font-serif text-2xl flex items-center justify-center shadow-lg shadow-gold/20 mb-5">
+          <div className="mx-auto w-12 h-12 rounded-full bg-surface-subtle text-terracotta font-serif text-2xl flex items-center justify-center mb-5">
             ॐ
           </div>
-          <h2 className="font-serif text-2xl md:text-3xl font-semibold text-text-primary mb-2">
+          <h2 className="font-serif text-2xl md:text-3xl font-medium text-text-primary mb-2">
             {isLogin ? 'Welcome, Devotee' : 'Enter the Sanctuary'}
           </h2>
           <p className="text-sm text-text-secondary leading-relaxed px-2">
@@ -134,17 +133,17 @@ export function Auth() {
           </p>
         </div>
 
-        <div className="flex bg-surface-subtle p-1 rounded-full border border-border-subtle mb-6">
+        <div className="flex bg-surface-subtle p-1 rounded-lg border border-border-subtle mb-6">
           <button 
             type="button" 
-            className={cn("flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-terracotta", isLogin ? "bg-surface text-terracotta shadow-sm" : "text-text-secondary hover:text-text-primary")}
+            className={cn("flex-1 py-2 text-sm font-medium rounded-md transition-colors outline-none", isLogin ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary")}
             onClick={() => { setIsLogin(true); setError(''); }}
           >
             Sign In
           </button>
           <button 
             type="button" 
-            className={cn("flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-terracotta", !isLogin ? "bg-surface text-terracotta shadow-sm" : "text-text-secondary hover:text-text-primary")}
+            className={cn("flex-1 py-2 text-sm font-medium rounded-md transition-colors outline-none", !isLogin ? "bg-surface text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary")}
             onClick={() => { setIsLogin(false); setError(''); }}
           >
             Create Account
@@ -159,7 +158,7 @@ export function Auth() {
               exit={{ opacity: 0, height: 0 }}
               className="mb-6 overflow-hidden"
             >
-              <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+              <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm border border-red-100">
                 {error}
               </div>
             </motion.div>
@@ -168,11 +167,11 @@ export function Auth() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Email Address</label>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-widest">Email Address</label>
             <input
               type="email"
               required
-              className="w-full bg-surface-subtle border border-border rounded-xl px-4 py-3.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-terracotta/50 focus:border-terracotta transition-all placeholder:text-text-muted/70 text-text-primary"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-[15px] focus:outline-none focus:border-terracotta transition-colors placeholder:text-text-muted/70 text-text-primary"
               placeholder="devotee@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -180,11 +179,11 @@ export function Auth() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Password</label>
+            <label className="text-xs font-medium text-text-secondary uppercase tracking-widest">Password</label>
             <input
               type="password"
               required
-              className="w-full bg-surface-subtle border border-border rounded-xl px-4 py-3.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-terracotta/50 focus:border-terracotta transition-all placeholder:text-text-muted/70 text-text-primary"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-[15px] focus:outline-none focus:border-terracotta transition-colors placeholder:text-text-muted/70 text-text-primary"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -194,22 +193,19 @@ export function Auth() {
           <Button 
             type="submit" 
             disabled={loading}
-            className="w-full mt-2 py-6 rounded-xl font-semibold shadow-lg text-[15px] group"
+            className="w-full mt-2 py-3 rounded-lg font-medium text-[15px]"
           >
             {loading ? (
-              <Loader2 className="animate-spin w-5 h-5 mr-2" />
+              <Loader2 className="animate-spin w-5 h-5 mx-auto" />
             ) : (
-              <>
-                <span>{isLogin ? 'Enter App' : 'Begin Journey'}</span>
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </>
+              isLogin ? 'Enter App' : 'Begin Journey'
             )}
           </Button>
         </form>
 
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-border"></div>
-          <span className="text-xs font-semibold text-text-muted uppercase tracking-widest">Or</span>
+          <span className="text-xs font-medium text-text-muted uppercase tracking-widest">Or</span>
           <div className="flex-1 h-px bg-border"></div>
         </div>
 
@@ -218,7 +214,7 @@ export function Auth() {
           variant="outline"
           disabled={loading}
           onClick={handleGoogleSignIn}
-          className="w-full py-6 rounded-xl font-semibold text-[15px] border-border hover:bg-surface-subtle hover:border-border"
+          className="w-full py-3 rounded-lg font-medium text-[15px] text-text-primary"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" className="mr-3">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

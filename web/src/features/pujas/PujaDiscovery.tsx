@@ -121,10 +121,10 @@ export function PujaDiscovery() {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-6 md:gap-8 pb-10">
+    <motion.div variants={containerVariants} className="flex flex-col gap-6 md:gap-8 pb-10">
       
       {/* Editorial Sanctuary Header Banner */}
-      <motion.section variants={itemVariants} className="flex flex-col gap-4 pt-4">
+      <motion.section  className="flex flex-col gap-4 pt-4">
         <div className="flex items-center gap-2">
           <div className="bg-gold-light text-[#9E6F05] px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-[rgba(184,134,11,0.2)]">
             <ShieldCheck size={14} /> Vedic Rituals & Archana
@@ -139,7 +139,7 @@ export function PujaDiscovery() {
       </motion.section>
 
       {/* Category Filter Pills */}
-      <motion.section variants={itemVariants} className="sticky top-[72px] md:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border -mx-4 px-4 md:mx-0 md:px-0 py-2">
+      <motion.section  className="sticky top-[72px] md:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border -mx-4 px-4 md:mx-0 md:px-0 py-2">
         <div className="flex overflow-x-auto hide-scrollbar gap-2 md:gap-3">
           {categories.map((cat) => (
             <button
@@ -147,7 +147,7 @@ export function PujaDiscovery() {
               className={cn(
                 "px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-terracotta border",
                 selectedCategory === cat 
-                  ? "bg-terracotta text-white border-terracotta shadow-md" 
+                  ? "bg-terracotta text-white border-terracotta " 
                   : "bg-surface border-border text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
               )}
               onClick={() => setSelectedCategory(cat)}
@@ -159,7 +159,7 @@ export function PujaDiscovery() {
       </motion.section>
 
       {/* Pujas List */}
-      <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mt-2">
+      <motion.section  className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mt-2">
         {isLoading && <CardSkeleton count={4} />}
 
         {!isLoading && filteredPujas.map((puja) => (
@@ -173,7 +173,7 @@ export function PujaDiscovery() {
                 layoutId={`image-${puja.id}`}
                 src={getCuratedPujaImage(puja)} 
                 alt={puja.title} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                className="w-full h-full object-cover transition-transform duration-700"
               />
               {puja.specialTag && (
                 <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 shadow-sm">

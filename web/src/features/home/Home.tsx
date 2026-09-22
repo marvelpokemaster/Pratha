@@ -50,10 +50,10 @@ export function Home() {
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-6 md:gap-10 pb-10">
+    <motion.div variants={containerVariants} className="flex flex-col gap-6 md:gap-10 pb-10">
       
       {/* Editorial Dawn Sanctuary Banner */}
-      <motion.section variants={itemVariants} className="flex flex-col gap-5 pt-2">
+      <motion.section  className="flex flex-col gap-5 pt-2">
         <div className="flex items-center gap-3">
           <span className="font-mantra text-xs md:text-sm tracking-widest text-terracotta uppercase font-bold">
             सुप्रभातम् • शुभं भवतु
@@ -74,11 +74,11 @@ export function Home() {
         </div>
 
         <div className="flex flex-wrap items-center gap-4 mt-2">
-          <Link to="/seva" className="flex items-center gap-2 bg-gradient-to-br from-terracotta to-[#A33C1D] text-white px-6 py-3 rounded-full font-semibold shadow-[0_4px_14px_rgba(184,74,40,0.25)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(184,74,40,0.35)] transition-all">
+          <Link to="/seva" className="flex items-center gap-2 bg-terracotta hover:bg-terracotta-hover text-white px-6 py-3 rounded-md font-medium transition-colors">
             <HeartHandshake size={18} />
             <span>Sponsor Daily Fodder</span>
           </Link>
-          <Link to="/pujas" className="flex items-center gap-2 bg-surface hover:bg-surface-subtle border border-border text-text-primary px-6 py-3 rounded-full font-semibold transition-colors">
+          <Link to="/pujas" className="flex items-center gap-2 bg-surface hover:bg-surface-subtle border border-border text-text-primary px-6 py-3 rounded-md font-medium transition-colors">
             <Flame size={18} className="text-terracotta" />
             <span>Explore Pujas</span>
           </Link>
@@ -86,13 +86,13 @@ export function Home() {
       </motion.section>
 
       {/* Quick Action Navigation Grid */}
-      <motion.section variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mt-4">
+      <motion.section  className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mt-4">
         {[
           { to: '/pujas', icon: Flame, title: 'Book a Puja', sub: 'Varanasi, Ujjain, Tirupati', color: 'text-terracotta', bg: 'bg-terracotta-light' },
           { to: '/seva', icon: HeartHandshake, title: 'Gau Seva', sub: 'Green Fodder & Medicine', color: 'text-tulsi', bg: 'bg-tulsi-light' },
           { to: '/gaushala', icon: MapPin, title: 'Meet the Herd', sub: 'Shri Krishna Gaushala', color: 'text-blue-600', bg: 'bg-blue-50' },
         ].map((item, i) => (
-          <Link key={i} to={item.to} className="group flex flex-col gap-3 p-4 md:p-5 rounded-2xl bg-surface border border-border shadow-sm hover:shadow-md hover:border-border-subtle transition-all">
+          <Link key={i} to={item.to} className="group flex flex-col gap-3 p-4 md:p-5 rounded-lg bg-surface border border-border hover:bg-surface-subtle transition-colors">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bg} ${item.color}`}>
               <item.icon size={20} />
             </div>
@@ -103,7 +103,7 @@ export function Home() {
           </Link>
         ))}
         
-        <button onClick={() => setRishiOpen(true)} className="group flex flex-col gap-3 p-4 md:p-5 rounded-2xl bg-gradient-to-br from-surface to-gold-light/20 border border-[rgba(184,134,11,0.2)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left">
+        <button onClick={() => setRishiOpen(true)} className="group flex flex-col gap-3 p-4 md:p-5 rounded-lg bg-surface hover:bg-gold-light/10 border border-border transition-colors text-left">
           <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gold-light text-[#9E6F05]">
             <Sparkles size={20} />
           </div>
@@ -115,7 +115,7 @@ export function Home() {
       </motion.section>
 
       {/* Rich Panchang Almanac Widget */}
-      <motion.section variants={itemVariants}>
+      <motion.section >
         <Card className="overflow-hidden border-border-subtle">
           <div className="p-5 md:p-6 border-b border-border bg-surface flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -145,7 +145,7 @@ export function Home() {
       </motion.section>
 
       {/* Today's Featured Ritual */}
-      <motion.section variants={itemVariants}>
+      <motion.section >
         <Card className="flex flex-col md:flex-row overflow-hidden shadow-sm hover:shadow-md transition-shadow group border-border">
           <div className="relative md:w-2/5 aspect-[4/3] md:aspect-auto overflow-hidden bg-surface-subtle">
             <img 
@@ -187,7 +187,7 @@ export function Home() {
                 <span className="text-xl font-bold text-text-primary">₹{featuredPuja.priceRupees}</span>
               </div>
 
-              <Link to="/pujas" className="flex items-center gap-2 bg-surface hover:bg-surface-subtle text-text-primary border border-border px-5 py-2.5 rounded-full font-semibold transition-colors">
+              <Link to="/pujas" className="flex items-center gap-2 bg-surface hover:bg-surface-subtle text-text-primary border border-border px-5 py-2.5 rounded-md font-medium transition-colors">
                 <span>Participate</span>
                 <ArrowRight size={16} />
               </Link>
@@ -197,7 +197,7 @@ export function Home() {
       </motion.section>
 
       {/* Daily Vedic Wisdom Shloka */}
-      <motion.section variants={itemVariants} className="text-center py-10 px-4">
+      <motion.section  className="text-center py-10 px-4">
         <div className="w-12 h-12 mx-auto rounded-full bg-gold-light text-[#9E6F05] flex items-center justify-center font-serif text-2xl shadow-inner mb-6">ॐ</div>
         <h4 className="font-mantra text-xl md:text-2xl font-bold text-text-primary tracking-widest mb-4">गावो विश्वस्य मातरः</h4>
         <p className="text-text-secondary max-w-lg mx-auto italic font-serif leading-relaxed">

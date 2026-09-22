@@ -42,9 +42,9 @@ export function GaushalaDiscovery() {
   const itemVariants = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as any, stiffness: 300, damping: 24 } } };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-6 md:gap-8 pb-10">
+    <motion.div variants={containerVariants} className="flex flex-col gap-6 md:gap-8 pb-10">
       
-      <motion.section variants={itemVariants} className="flex flex-col gap-4 pt-4">
+      <motion.section  className="flex flex-col gap-4 pt-4">
         <div className="flex items-center gap-2">
           <div className="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
             <ShieldCheck size={14} /> Certified Sanctuary
@@ -58,7 +58,7 @@ export function GaushalaDiscovery() {
         </p>
       </motion.section>
 
-      <motion.section variants={itemVariants} className="sticky top-[72px] md:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border -mx-4 px-4 md:mx-0 md:px-0 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <motion.section  className="sticky top-[72px] md:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border -mx-4 px-4 md:mx-0 md:px-0 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex overflow-x-auto hide-scrollbar gap-2">
           {['All', 'Needs Medical', 'Calves', 'Sahiwal', 'Gir'].map((f) => (
             <button
@@ -66,7 +66,7 @@ export function GaushalaDiscovery() {
               className={cn(
                 "px-4 py-2 rounded-full text-[13px] font-semibold transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-terracotta border",
                 filter === f 
-                  ? "bg-text-primary text-white border-text-primary shadow-sm" 
+                  ? "bg-text-primary text-white border-text-primary " 
                   : "bg-surface border-border text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
               )}
               onClick={() => setFilter(f)}
@@ -88,16 +88,16 @@ export function GaushalaDiscovery() {
         </div>
       </motion.section>
 
-      <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mt-2">
+      <motion.section  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mt-2">
         {isLoading && <CardSkeleton count={6} />}
         {!isLoading && filtered.map((animal) => (
-          <Card key={animal.id} className="flex flex-col overflow-hidden group hover:shadow-lg transition-all duration-300 hover:border-border-subtle cursor-pointer" onClick={() => navigate(`/gaushala/animal/${animal.id}`)}>
+          <Card key={animal.id} className="flex flex-col overflow-hidden group hover:bg-surface-subtle transition-colors cursor-pointer" onClick={() => navigate(`/gaushala/animal/${animal.id}`)}>
             <div className="relative w-full aspect-[4/3] overflow-hidden bg-surface-subtle">
               <motion.img 
                 layoutId={`img-${animal.id}`}
                 src={getCuratedCowImage(animal.id, animal.name)} 
                 alt={animal.name} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                className="w-full h-full object-cover transition-transform duration-700"
               />
               {animal.needsSupport && (
                 <div className="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-full shadow-lg" title="Requires Medical Attention">

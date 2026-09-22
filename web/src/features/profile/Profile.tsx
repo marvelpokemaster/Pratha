@@ -82,7 +82,7 @@ export function Profile() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-5 pt-4"
       >
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-terracotta to-gold text-white flex items-center justify-center font-serif text-3xl font-bold shadow-lg shadow-terracotta/20 shrink-0">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-terracotta to-gold text-white flex items-center justify-center font-serif text-3xl font-bold shrink-0">
           {getInitials(profile?.profile?.displayName || user?.email)}
         </div>
         
@@ -142,7 +142,7 @@ export function Profile() {
               />
             ) : (
               donations.map((d) => (
-                <Card key={d.id} className="p-5 flex justify-between items-center group hover:shadow-md transition-shadow">
+                <Card key={d.id} className="p-5 flex justify-between items-center group hover:bg-surface-subtle transition-colors">
                   <div>
                     <h4 className="font-semibold text-text-primary text-[15px]">{d.targetName || 'Gau Seva Offering'}</h4>
                     <p className="text-xs text-text-muted mt-1">Ref: {d.id} • {d.dateStr || 'Recorded'}</p>
@@ -176,7 +176,7 @@ export function Profile() {
               />
             ) : (
               bookings.map((b) => (
-                <Card key={b.id} className="p-5 flex justify-between items-center group hover:shadow-md transition-shadow">
+                <Card key={b.id} className="p-5 flex justify-between items-center group hover:bg-surface-subtle transition-colors">
                   <div>
                     <div className="inline-block px-2 py-0.5 bg-gold-light text-gold text-[10px] font-bold uppercase tracking-widest rounded-full mb-2">
                       {b.status || 'CONFIRMED'}
@@ -204,7 +204,7 @@ export function Profile() {
               <span className="text-[11px] font-bold uppercase tracking-widest text-text-muted">
                 Chanted in Sankalpas
               </span>
-              <Button variant="outline" size="sm" className="h-8 rounded-full" onClick={() => setShowAddFamily(!showAddFamily)}>
+              <Button variant="outline" size="sm" className="h-8 rounded-md" onClick={() => setShowAddFamily(!showAddFamily)}>
                 <Plus size={14} className="mr-1.5" />
                 Add Member
               </Button>
@@ -217,18 +217,18 @@ export function Profile() {
                     <form onSubmit={handleAddFamily} className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Full Name</label>
-                        <input type="text" required placeholder="e.g. Family member name" className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50" value={memberName} onChange={(e) => setMemberName(e.target.value)} />
+                        <input type="text" required placeholder="e.g. Family member name" className="w-full bg-surface border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50" value={memberName} onChange={(e) => setMemberName(e.target.value)} />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
                           <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Relationship</label>
-                          <select className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50" value={memberRelation} onChange={(e) => setMemberRelation(e.target.value)}>
+                          <select className="w-full bg-surface border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50" value={memberRelation} onChange={(e) => setMemberRelation(e.target.value)}>
                             <option>Spouse</option><option>Child</option><option>Parent</option><option>Sibling</option>
                           </select>
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Nakshatra</label>
-                          <input type="text" placeholder="e.g. Ashwini" className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50" value={memberNakshatra} onChange={(e) => setMemberNakshatra(e.target.value)} />
+                          <input type="text" placeholder="e.g. Ashwini" className="w-full bg-surface border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50" value={memberNakshatra} onChange={(e) => setMemberNakshatra(e.target.value)} />
                         </div>
                       </div>
                       <div className="flex justify-end gap-2 mt-2">
@@ -279,7 +279,7 @@ export function Profile() {
               <div className="bg-tulsi-light text-tulsi px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Active</div>
             </Card>
 
-            <Button variant="destructive" onClick={signOut} className="w-full justify-center gap-2 mt-4 py-6 rounded-xl font-semibold">
+            <Button variant="destructive" onClick={signOut} className="w-full justify-center gap-2 mt-4 py-6 rounded-md font-semibold">
               <LogOut size={16} /> Sign Out of Sanctuary
             </Button>
           </div>
@@ -299,12 +299,12 @@ function EmptyState({ icon: Icon, title, desc, actionLink, actionLabel, actionOn
       <p className="text-sm text-text-secondary max-w-md mx-auto mb-6 leading-relaxed">{desc}</p>
       {actionLink ? (
         <Link to={actionLink}>
-          <Button variant="outline" className="rounded-full gap-2 font-semibold">
+          <Button variant="outline" className="rounded-md gap-2 font-medium">
             {actionLabel} <ArrowRight size={16} />
           </Button>
         </Link>
       ) : (
-        <Button variant="outline" onClick={actionOnClick} className="rounded-full gap-2 font-semibold">
+        <Button variant="outline" onClick={actionOnClick} className="rounded-md gap-2 font-medium">
           <Plus size={16} /> {actionLabel}
         </Button>
       )}

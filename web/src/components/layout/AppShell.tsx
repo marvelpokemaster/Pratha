@@ -27,7 +27,7 @@ export function AppShell() {
 
         <motion.button 
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-1.5 bg-gradient-to-br from-gold-light to-[rgba(233,196,106,0.1)] border border-[rgba(184,134,11,0.2)] text-[#9E6F05] px-3 py-1.5 rounded-full text-[13px] font-semibold shadow-sm"
+          className="flex items-center gap-1.5 bg-surface-subtle text-text-primary px-3 py-1.5 rounded-md text-xs font-medium"
           onClick={() => setRishiOpen(true)}
           aria-label="Open Rishi Vedic Assistant"
         >
@@ -52,7 +52,7 @@ export function AppShell() {
               key={item.path}
               to={item.path}
               className={({ isActive }) => cn(
-                "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all outline-none focus-visible:ring-2 focus-visible:ring-terracotta",
+                "flex items-center gap-4 px-4 py-3 rounded-md text-sm font-medium transition-all outline-none focus-visible:ring-2 focus-visible:ring-terracotta",
                 isActive 
                   ? "bg-terracotta-light text-terracotta font-semibold" 
                   : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
@@ -72,9 +72,9 @@ export function AppShell() {
             </div>
           </div>
           <motion.button 
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-gold-light to-[rgba(233,196,106,0.1)] border border-[rgba(184,134,11,0.2)] text-[#9E6F05] px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition-shadow"
+            
+            
+            className="w-full flex items-center justify-center gap-2 bg-surface-subtle hover:bg-surface-subtle border border-border text-text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
             onClick={() => setRishiOpen(true)}
           >
             <Sparkles size={16} />
@@ -91,7 +91,7 @@ export function AppShell() {
       </main>
 
       {/* Mobile Floating Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-[calc(12px+env(safe-area-inset-bottom,0px))] left-4 right-4 h-16 flex items-center justify-around px-2 z-50 bg-white/90 dark:bg-[#1B1815]/90 backdrop-blur-2xl border border-border rounded-full shadow-lg">
+      <nav className="md:hidden fixed bottom-[calc(12px+env(safe-area-inset-bottom,0px))] left-4 right-4 h-16 flex items-center justify-around px-2 z-50 bg-white/90 dark:bg-[#1B1815]/90 backdrop-blur-xl border border-border rounded-2xl shadow-sm">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
