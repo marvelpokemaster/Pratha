@@ -35,6 +35,11 @@ export function DonationModal({
 
     setLoading(true);
     try {
+      if (!user) {
+        onClose();
+        window.location.assign('/login');
+        return;
+      }
       const res = await createDonation({
         amountRupees: finalAmount,
         targetType: 'SEVA_INITIATIVE',
@@ -75,7 +80,7 @@ export function DonationModal({
               Seva Recorded with Gratitude
             </h3>
             <p className="text-sm text-text-secondary max-w-md">
-              Devotee {user?.displayName || 'Seeker'}, your contribution of <strong>₹{customAmount || amount}</strong> for <em>{initiative}</em> has been offered to Shri Krishna Gaushala.
+              Devotee {user?.user_metadata?.display_name || 'Seeker'}, your contribution of <strong>₹{customAmount || amount}</strong> for <em>{initiative}</em> has been offered to Shri Krishna Gaushala.
             </p>
             <div className="badge-gold my-2">
               Receipt No: {receiptId} • Offering Confirmed

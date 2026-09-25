@@ -14,19 +14,12 @@ import { SevaExperience } from '@/features/seva/SevaExperience';
 import { Profile } from '@/features/profile/Profile';
 
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { Discover } from '@/features/discover/Discover';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <LoadingScreen message="Restoring Sacred Session..." subtext="Connecting to Pratha" />;
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  
+  const { loading } = useAuth();
+  if (loading) return <LoadingScreen message="Restoring Sacred Session..." subtext="Connecting to Pratha" />;
   return <>{children}</>;
 };
 
@@ -45,6 +38,7 @@ export function PrathaAppContent() {
         }
       >
         <Route path="/" element={<Home />} />
+        <Route path="/discover" element={<Discover />} />
         <Route path="/pujas" element={<PujaDiscovery />} />
         <Route path="/gaushala" element={<GaushalaDiscovery />} />
         <Route path="/gaushala/animal/:id" element={<AnimalPassport />} />

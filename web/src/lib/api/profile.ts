@@ -1,4 +1,4 @@
-import { fetchApi } from './client';
+import { supabase } from '@/lib/supabase';
 
 export interface Profile {
   id?: string;
@@ -30,18 +30,38 @@ export interface FamilyMember {
 }
 
 export async function getProfile(): Promise<{ profile: Profile }> {
-  return fetchApi<{ profile: Profile }>('/api/v1/profile');
+  const { data, error } = await supabase.from('profiles').select('id,display_name,city,gotra,nakshatra').single();
+  if (error) throw error;
+  return { profile: { id: data.id, displayName: data.display_name, city: data.city, gotra: data.gotra, nakshatra: data.nakshatra } };
 }
 
 export async function updateProfile(profile: Partial<Profile>): Promise<{ success: boolean }> {
-  return fetchApi<{ success: boolean }>('/api/v1/profile', {
-    method: 'PUT',
-    body: JSON.stringify(profile),
+  const { error } = await supabase.from('profiles').upsert({
+    display_name: profile.displayName,
+    city: profile.city,
+    gotra: profile.gotra,
+    nakshatra: profile.nakshatra,
   });
+  if (error) throw error;
+  return { success: true };
 }
 
 export async function getDonations(): Promise<{ donations: Donation[] }> {
-  return fetchApi<{ donations: Donation[] }>('/api/v1/donations');
+  const { data, error } = await supabase
+    .from('seva_contributions')
+    .select('id,amount,status,message,created_at')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return {
+    donations: (data ?? []).map((row) => ({
+      id: row.id,
+      targetType: 'SEVA',
+      amountRupees: Number(row.amount) / 100,
+      paymentStatus: row.status,
+      dedication: row.message || undefined,
+      createdAt: row.created_at,
+    })),
+  };
 }
 
 export async function createDonation(donation: {
@@ -52,19 +72,39 @@ export async function createDonation(donation: {
   dedication?: string;
   taxExempt80G?: boolean;
 }): Promise<{ success: boolean, donationId: string }> {
-  return fetchApi<{ success: boolean, donationId: string }>('/api/v1/donations', {
-    method: 'POST',
-    body: JSON.stringify(donation),
+  const { data: campaign, error: campaignError } = await supabase
+    .from('seva_campaigns')
+    .select('id,gaushala_id')
+    .eq('status', 'published')
+    .limit(1)
+    .maybeSingle();
+  if (campaignError) throw campaignError;
+  if (!campaign) throw new Error('No active seva campaign is available.');
+  const { data, error } = await supabase.rpc('create_contribution', {
+    p_amount: Math.max(1000, Math.round(donation.amountRupees * 100)),
+    p_campaign_id: campaign.id,
+    p_gaushala_id: campaign.gaushala_id,
+    p_animal_id: null,
+    p_message: donation.dedication || null,
+    p_is_anonymous: false,
   });
+  if (error) throw error;
+  return { success: true, donationId: data?.id || 'pending' };
 }
 
 export async function getFamily(): Promise<{ family: FamilyMember[] }> {
-  return fetchApi<{ family: FamilyMember[] }>('/api/v1/family');
+  const { data, error } = await supabase.from('family_members').select('id,name,relation,gotra,nakshatra').order('created_at');
+  if (error) throw error;
+  return { family: (data ?? []).map((row) => ({ id: row.id, name: row.name, relationship: row.relation || '', rashi: row.gotra, nakshatra: row.nakshatra })) };
 }
 
 export async function addFamilyMember(member: Omit<FamilyMember, 'id'>): Promise<{ success: boolean, memberId: string }> {
-  return fetchApi<{ success: boolean, memberId: string }>('/api/v1/family', {
-    method: 'POST',
-    body: JSON.stringify(member),
-  });
+  const { data, error } = await supabase.from('family_members').insert({
+    name: member.name,
+    relation: member.relationship,
+    gotra: member.rashi,
+    nakshatra: member.nakshatra,
+  }).select('id').single();
+  if (error) throw error;
+  return { success: true, memberId: data.id };
 }

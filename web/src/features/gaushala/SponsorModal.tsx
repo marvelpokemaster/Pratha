@@ -70,7 +70,7 @@ export function SponsorModal({ animal, isOpen, onClose }: SponsorModalProps) {
               Seva Received with Blessings
             </h3>
             <p className="text-sm text-text-secondary max-w-md">
-              Thank you, {user?.displayName || 'Devotee'}, for sponsoring <strong>{animal.name}</strong>. 
+              Thank you, {user?.user_metadata?.display_name || 'Devotee'}, for sponsoring <strong>{animal.name}</strong>.
               Your compassionate offering flows directly toward daily nourishment and veterinary healing at Shri Krishna Gaushala.
             </p>
             <div className="badge-gold my-2">

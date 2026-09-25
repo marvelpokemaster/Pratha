@@ -29,3 +29,10 @@ backend/__pycache__/
 .firebase/
 firebase-debug.log
 .kilo/
+supabase/.temp/
+supabase/.branches/
+web/dist/
+web/.env.local
+expo/.env.local
+expo/dist/
+test-results/

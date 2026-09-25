@@ -1,237 +1,129 @@
-> **AI AGENT INSTRUCTION:** Read this document before exploring the repository. Treat it as the current engineering state snapshot. Use the file paths and sections here to navigate directly to relevant code. Do NOT scan the entire repository unless the task genuinely requires it. Verify only the specific assumptions relevant to the requested task.
+> **AI AGENT INSTRUCTION:** Read this document before exploring the repository. Treat it as the canonical engineering state snapshot. Inspect only files relevant to the current task and update this document whenever implementation state changes.
 
 # Agent Handoff — Pratha
 
-> Canonical continuation document for AI coding agents.
-
 | Field | Value |
 |---|---|
-| Last updated | 2026-09-23 |
-| Branch | `feat/expo-ios-migration` (synced to `main`) |
-| Commit | `d94d0c2` (chore(branding): rename app from Sattva to Pratha) |
-| Working tree | Clean |
-| Current phase | Cross-platform migration and final polish |
-| Overall status | Fully functional React Web App, Android App, and iOS Bridge |
+| Last updated | 2026-09-25 |
+| Branch | `devin/1790111517-pratha-supabase-platform` |
+| Current phase | Hosted Supabase integration, public discovery, and end-to-end hardening |
+| Overall status | Web discovery flows are connected to hosted Supabase; payments, Edge Functions, and production Auth configuration remain incomplete |
 
----
+## Product and architecture
 
-## 2. READ THIS FIRST
+Pratha (formerly Sattva) is a cultural, temple, Pooja, Gaushala, Seva, and spiritual-assistance platform. The web app is React 19 + Vite + React Router + TanStack Query + Lucide. Android wraps `web/dist` with Capacitor. iOS uses the existing Expo SDK 57 DOM bridge in `expo/src/PrathaDomBridge.tsx`; do not rewrite the web UI into React Native primitives.
 
-**Product Description:** Pratha (formerly Sattva) is a digital sanctuary app offering remote Vedic rituals (Pujas), Gaushala interactions (cow adoption/feeding), Seva (donations), and AI-guided spiritual assistance (Rishi).
-**Current State:** The core Web application (React+Vite) has been fully implemented, integrated with Firebase Auth & Firestore, and bundled natively into Android (via Capacitor) and iOS (via Expo DOM Components). The branding was just successfully renamed from Sattva to Pratha across all files, configurations, and Git remotes.
-**What's Next:** There is no active implementation task. The application is in a stable state ready for distribution.
-**Critical Constraints:** DO NOT rewrite the React DOM application into React Native primitives. The iOS build specifically relies on Expo SDK 57's `"use dom"` component architecture (`PrathaDomBridge.tsx`) to render the existing web app in-memory on iOS.
-
----
-
-## 3. CURRENT TASK / NEXT ACTION
-
-## Current Task
-
-No active implementation task recorded.
-
-## Immediate Next Step
-
-No active implementation task recorded.
-
-## Definition of Done
-
-- [ ] N/A
-
----
-
-## 4. PROJECT ARCHITECTURE
-
-- **Frontend (`web/`)**: React 19 + Vite + Tailwind CSS + Lucide Icons + React Router DOM. State managed with TanStack Query. Uses Firebase Client SDK for Auth.
-- **Android App (`web/android/`)**: Built via Capacitor 8, directly wrapping the `web/dist` assets.
-- **iOS App (`expo/`)**: Isolated Expo project utilizing DOM components (`react-native-webview`) to render the `web` React app seamlessly without rewriting it in React Native.
-- **Backend API (`backend/`)**: Cloudflare Worker (`src/index.ts`) acting as an API Gateway. Communicates directly with Firestore via Google Cloud REST API using Service Account logic/Project ID and handles Gemini AI requests.
-- **Database**: Firebase / Google Cloud Firestore (Project ID: `sattva-utsavam-dev`).
-- **AI**: Gemini 2.5 Flash API utilized in the Cloudflare worker for the "Rishi" AI guide interactions.
+The target backend is hosted Supabase:
 
 ```text
-Pratha/
-├── backend/            → Cloudflare Worker API (TS)
-├── expo/               → Expo iOS DOM Component Bridge
-├── web/                → React Vite Frontend + Capacitor (Android)
-└── docs/               → Handoff and docs
+React DOM web / Capacitor Android / Expo DOM iOS
+                         ↓
+Supabase Auth + PostgreSQL/RLS + Storage + RPCs/Edge Functions
+                         ↓
+Razorpay, Gemini, notifications (not configured yet)
 ```
 
----
+The Cloudflare Worker and Firebase client remain in the repository only as migration/fallback paths. Migrated catalog, profile, family, Auth, booking, and contribution code uses `web/src/lib/supabase.ts` and `web/src/lib/api/*.ts`.
 
-## 5. REPOSITORY MAP
+## Hosted Supabase state
 
-```text
-backend/
-├── src/index.ts        → Cloudflare Worker entrypoint (Auth, Firestore, Gemini)
-├── wrangler.jsonc      → Worker environment config & secrets config
+- Project: `Pratha`
+- Ref: `yxwwgynxgihrktwndhep`
+- Region: `ap-south-1`
+- URL: `https://yxwwgynxgihrktwndhep.supabase.co`
+- Dashboard: `https://supabase.com/dashboard/project/yxwwgynxgihrktwndhep`
+- MCP: `supabase-remote-bbca`, read-only HTTP MCP, OAuth authorized
+- Browser key: publishable key is wired as a fallback in `web/src/lib/supabase.ts`; deployments should use `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-expo/
-├── src/PrathaDomBridge.tsx → The DOM bridge component that mounts the web app for iOS
-├── App.tsx             → Expo root rendering the bridge
-├── app.json / eas.json → Expo and EAS build configurations
+Applied migrations:
 
-web/
-├── android/            → Capacitor generated Android studio project
-├── src/
-│   ├── App.tsx         → Main React entrypoint & routing setup
-│   ├── components/     → Shared UI components (layout, dialogs, loaders)
-│   ├── features/       → Feature modules (auth, ai, home, gaushala, profile, pujas, seva)
-│   └── lib/            → Shared utilities, API clients, Firebase init
-├── capacitor.config.ts → Capacitor config for Android
-└── vite.config.ts      → Vite config
-```
+1. `20260827105146_001_sattva_schema.sql`
+2. `20260922000100_002_schema_v2_core.sql`
+3. `20260922000200_003_schema_v2_domain.sql`
+4. `20260922000300_004_rls_and_rpc.sql`
+5. `20260922000400_005_integrity.sql`
+6. `20260922000500_006_demonstration_catalog.sql`
+7. `20260925000100_007_security_hardening.sql` (local follow-up; hosted application requires a valid CLI PAT to apply)
 
----
+Hosted MCP verification on 2026-09-25:
 
-## 6. IMPLEMENTATION STATUS
+- All six migrations listed remotely.
+- All public application tables reported `rls_enabled: true`.
+- Demo counts: 3 temples, 1 festival, 3 events, 1 published Gaushala, 2 public animals, 2 published Pooja offerings, 2 published Seva campaigns.
+- Direct REST query returned the two published Pooja offerings.
+- Security advisors warned about executable security-definer helpers; follow-up migration `007` narrows browser execute grants and still needs to be pushed. Performance advisors report many unindexed foreign keys; review these before production imports.
 
-| Area | Status | Relevant Files | Notes |
-|---|---|---|---|
-| Frontend Web UI | COMPLETE | `web/src/features/` | Polished design with sacred aesthetics |
-| Authentication | COMPLETE | `web/src/features/auth/`, `web/src/lib/firebase.ts` | Enforced Firebase Google/Email login before accessing app |
-| Database / Backend | COMPLETE | `backend/src/index.ts` | Cloudflare Worker REST endpoints mapping to Firestore |
-| Capacitor Android | COMPLETE | `web/android/` | Builds cleanly (`npx cap sync android`) |
-| Expo iOS Bridge | COMPLETE | `expo/src/PrathaDomBridge.tsx` | Expo DOM bridge fully implemented and bundles successfully |
-| App Rename | COMPLETE | All files | Renamed Sattva -> Pratha completely |
+## Current implementation status
 
----
+| Area | Status | Notes |
+|---|---|---|
+| Public Home | Working | Existing polished shell reads hosted Pooja and welfare data |
+| Pooja discovery | Working | Reads `puja_offerings` and temple relation from hosted Supabase |
+| Signed-out booking UX | Working | Modal opens; submit redirects signed-out users to `/login` |
+| Gaushala directory/passports | Working | Reads hosted Gaushala and animal rows; sample disclaimers render |
+| Seva UI | Working | Existing initiative UX; contribution RPC path requires Auth and a published campaign |
+| Profile/family/history APIs | Supabase-connected | Authenticated RLS behavior still needs a signed-in test |
+| Supabase Auth | Cut over | `AuthContext` and email/password screen use Supabase; email-confirmation/redirect settings need dashboard verification |
+| Temples/events/festivals/Live Darshan | Partial | `/discover` now reads hosted temples, events, and festivals; dedicated detail/live-stream pages remain pending |
+| Firebase/Worker retirement | Partial | `firebase.ts`, `api/client.ts`, and Rishi Worker path remain as fallback |
+| Payments | Not production-ready | Razorpay keys, webhook function, and sandbox test are not configured |
+| Notifications/AI Edge Functions | Not complete | Must be implemented and deployed before production claim |
+| Expo typecheck | Known failures | StatusBar prop typing and duplicate TanStack Query core type mismatch remain |
 
-## 7. RECENT CHANGES
+## Important files
 
-### 2026-09-23 — Rename app from Sattva to Pratha
-- Changed: Application branding, GitHub repository name, local directory.
-- Files: `web/index.html`, `web/src/App.tsx`, `expo/app.json`, `expo/src/PrathaDomBridge.tsx`, etc.
-- Why: User requested complete rebrand to "Pratha".
-- Result: Clean git state, successful builds across Web, Android, and iOS Expo bundle.
-- Remaining work: None.
+- `web/src/App.tsx` — BrowserRouter, shared route tree, QueryClient, AuthProvider.
+- `web/src/features/auth/AuthContext.tsx` — Supabase session listener and sign-out.
+- `web/src/features/auth/Auth.tsx` — Supabase email/password sign-in and sign-up.
+- `web/src/lib/supabase.ts` — hosted client, env variables, i18n helper.
+- `web/src/lib/api/puja.ts` — Pooja queries and `create_puja_booking` RPC.
+- `web/src/lib/api/gaushala.ts` — Gaushala, animal, welfare queries.
+- `web/src/lib/api/profile.ts` — profiles, family, contributions, contribution RPC.
+- `supabase/migrations/` — schema, RLS/RPC, integrity, and deterministic demo catalog.
+- `expo/src/PrathaDomBridge.tsx` — sensitive `'use dom'` bridge; preserve.
+- `web/android/` — generated Capacitor output; do not edit manually.
 
-### 2026-09-23 — Expo iOS DOM Bridge Migration
-- Changed: Created `expo/` isolated directory.
-- Files: `expo/App.tsx`, `expo/src/PrathaDomBridge.tsx`, `web/src/App.tsx` (exported `PrathaAppContent`).
-- Why: User requested iOS build without rewriting the React DOM app.
-- Result: EAS iOS build architecture functional.
+## Required next steps
 
----
+1. Add public Discover, Events, Festivals, Temples, and Live Darshan routes backed by hosted tables.
+2. Add an explicit Pooja booking date selector and authenticated end-to-end test against `create_puja_booking`; current UI sends today and needs a better availability UX.
+3. Verify Supabase Auth email confirmation, redirect URLs, password reset, and signed-in RLS behavior.
+4. Implement/deploy Edge Functions for AI, payment order/webhook handling, notification dispatch, and any legacy import.
+5. Replace remaining Worker/Firebase calls or document each as intentional fallback.
+6. Add browser E2E tooling; repeat desktop/mobile responsive QA and capture evidence.
+7. Fix or document Supabase advisor findings, then run final lint/typecheck/build, Expo checks, migration checks, and regression QA.
+8. Update this file again before commit/PR.
 
-## 8. IMPORTANT TECHNICAL DECISIONS
+## Validation already performed
 
-### Decision: Use Expo DOM Components for iOS (Zero-Rewrite)
-Reason: To deploy the web application to iOS without spending weeks rewriting DOM elements (`div`, `span`) to React Native primitives (`View`, `Text`).
-Do not change this unless: The application's fundamental architecture shifts to pure React Native. Keep all web logic in `web/` and only mount it through `expo/src/PrathaDomBridge.tsx`.
+- `web/npm run build` passes.
+- `web/npm run lint` passes with existing warnings and zero errors.
+- Real Vite app manually tested in Chrome at Home, Pujas, signed-out Pooja modal, Gaushala, Seva, and Profile.
+- Real Vite app manually tested at `/discover`; hosted temple, event, and festival cards rendered after fixing the event description column selection.
+- Browser console showed only Vite/React DevTools informational output during those flows.
+- Hosted Supabase was validated through MCP `list_migrations`, `list_tables`, `execute_sql`, `get_project_url`, `get_publishable_keys`, `generate_typescript_types`, and security/performance advisors.
+- Screenshots captured locally during manual QA under `/home/ubuntu/screenshots/`.
 
-### Decision: Direct Firestore REST API via Cloudflare Worker
-Reason: The backend acts as a stateless gateway. Instead of using the Firebase Admin SDK (which is bloated for V8 workers), it makes raw REST calls to `firestore.googleapis.com`.
-Do not change this unless: You are migrating away from Cloudflare Workers to a Node.js/Docker container backend.
+## Known limitations and failed approaches
 
----
+- The first Supabase token supplied was rejected because it was not an `sbp_...` personal access token. Hosted project creation and migrations were eventually completed with a valid token, but revalidate the stored CLI token before further deployment.
+- The installed MCP URL is read-only; use the Supabase CLI with a valid PAT for migration/Edge Function/configuration writes. The local security follow-up is not yet hosted.
+- No secret values belong in this file or commits. Required names include `PRATHA_SUPABASE_DB_PASSWORD`, a valid Supabase PAT, Razorpay sandbox credentials, Gemini key, and notification provider credentials.
+- Do not claim production-ready status while payment, notification, hosted Auth configuration, and Edge Function dependencies remain unconfigured.
 
-## 9. KNOWN ISSUES / BUGS
-
-No major unresolved functional bugs currently logged.
-
----
-
-## 10. FAILED APPROACHES
-
-None documented during the recent rename/Expo migration phase.
-
----
-
-## 11. ENVIRONMENT / SETUP
-
-* **Node.js**: v20+ recommended
-* **Package Manager**: `npm` (Note: Run `npm install` inside `web/`, `expo/`, and `backend/` independently as there is no root package.json workspace setup yet).
-* **Firebase**: Project `sattva-utsavam-dev`
-* **Local Dev (Web)**: `cd web && npm run dev`
-* **Local Dev (Expo)**: `cd expo && npm start`
-
----
-
-## 12. IMPORTANT COMMANDS
+## Commands
 
 ```bash
-# Start Web Frontend
 cd web && npm run dev
-
-# Build Web Frontend
 cd web && npm run build
-
-# Build Android (Capacitor)
-cd web && npx cap sync android && cd android && ./gradlew assembleDebug
-
-# Export Expo iOS Bundle
-cd expo && npx expo export -p ios --clear
-
-# Trigger Cloud iOS Simulator Build (EAS)
-cd expo && npx eas build --platform ios --profile preview-simulator
+cd web && npm run lint
+export PATH="$HOME/.local/bin:$PATH"
+supabase migration list
+supabase db push                 # requires a valid SUPABASE_DB_PASSWORD and CLI PAT
 ```
 
----
+## Delivery state
 
-## 13. DATA / DATABASE STATE
-
-* **Technology**: Google Cloud Firestore (Firebase)
-* **Location**: Configured in `web/src/lib/firebase.ts` (Client) and `backend/src/index.ts` (REST).
-* **Key Collections**:
-  - `users/{uid}/puja_bookings`
-  - `users/{uid}/seva_contributions`
-  - `users/{uid}/family_members`
-* No raw credentials in code. `backend` relies on `wrangler.jsonc` secrets.
-
----
-
-## 14. API / INTEGRATION MAP
-
-| Integration | Location | Purpose | Status |
-|---|---|---|---|
-| Cloudflare Worker | `backend/src/index.ts` | Custom endpoints (`/api/v1/...`) | Active |
-| Firestore API | `backend/src/index.ts` | Data persistence for bookings/seva | Active |
-| Gemini API | `backend/src/index.ts` -> `/api/v1/ai/ask` | Rishi AI chatbot responses | Active |
-| Firebase Auth | `web/src/lib/firebase.ts` | Client-side Google/Email authentication | Active |
-
----
-
-## 15. TESTING STATUS
-
-* **Frameworks**: None explicitly configured for unit testing in `web/` package.json.
-* **Linter**: Oxlint configured (`npm run lint` in `web/`). Passes with 0 errors.
-* **Builds**: `npm run build` (Vite/TSC) passes. Android Gradle build passes. Expo iOS export passes.
-
----
-
-## 16. GIT / WORKING TREE CONTEXT
-
-* **Branch**: `feat/expo-ios-migration`
-* **Latest Commit**: `d94d0c2`
-* **Uncommitted Changes**: None.
-* **Remotes**: `origin` points to `marvelpokemaster/Pratha`.
-
----
-
-## 17. DO NOT TOUCH / HIGH-RISK AREAS
-
-* `expo/src/PrathaDomBridge.tsx`: Highly sensitive Expo `"use dom"` directive file. Do not alter the imports or mounting strategy without thoroughly understanding Expo SDK 57 DOM components.
-* `web/android/`: Auto-generated and carefully synced Capacitor folder. Do not edit Android native files manually unless absolutely necessary (use `capacitor.config.ts` or plugins instead).
-
----
-
-## 18. OPEN QUESTIONS
-
-- [ ] Should a root workspace `package.json` (npm workspaces / turbo) be introduced to manage `web/`, `expo/`, and `backend/` scripts together?
-- [ ] Will production builds require Apple Developer Program certificates in `eas.json`?
-
----
-
-## 19. HANDOFF CHECKLIST
-
-- [x] Current task documented
-- [x] Architecture updated
-- [x] Recent changes recorded
-- [x] Known issues recorded
-- [x] Failed approaches recorded
-- [x] Important decisions recorded
-- [x] Commands verified
-- [x] Git state recorded
-- [x] No secrets included
-- [x] Next action clearly stated
+- No PR has been created yet.
+- Branch changes are intentionally uncommitted until the remaining implementation and final diff review are complete.
+- Never push directly to `main`.

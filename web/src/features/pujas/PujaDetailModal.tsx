@@ -12,7 +12,7 @@ interface PujaDetailModalProps {
 
 export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
   const { user } = useAuth();
-  const [sankalpaName, setSankalpaName] = useState(user?.displayName || '');
+  const [sankalpaName, setSankalpaName] = useState(user?.user_metadata?.display_name || '');
   const [gotra, setGotra] = useState('');
   const [nakshatra, setNakshatra] = useState('');
   const [familyMembers, setFamilyMembers] = useState('');
@@ -24,6 +24,11 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sankalpaName.trim()) return;
+    if (!user) {
+      onClose();
+      window.location.assign('/login');
+      return;
+    }
 
     setLoading(true);
     try {

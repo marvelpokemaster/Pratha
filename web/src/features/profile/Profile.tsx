@@ -50,7 +50,7 @@ export function Profile() {
   });
 
   const profile = profileData?.profile;
-  const displayName = profile?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Devotee';
+  const displayName = profile?.displayName || user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Devotee';
   const email = user?.email || 'Registered Devotee';
 
   // Ground strictly in backend data without placeholder user identities or mock data
@@ -84,7 +84,7 @@ export function Profile() {
       <section className="devotee-profile-card">
         <div className="devotee-avatar-box">
           <img 
-            src={user?.photoURL || IMAGES.profile.defaultAvatar} 
+            src={user?.user_metadata?.avatar_url || IMAGES.profile.defaultAvatar}
             alt={displayName} 
           />
         </div>

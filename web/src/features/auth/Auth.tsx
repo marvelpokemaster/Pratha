@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -33,13 +32,24 @@ export function Auth() {
 
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { display_name: email.split('@')[0] }, emailRedirectTo: window.location.origin },
+        });
+        if (signUpError) throw signUpError;
+        if (!data.session) {
+          setError('Account created. Check your email to confirm access, then sign in.');
+          setIsLogin(true);
+          return;
+        }
       }
       navigate('/');
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please verify credentials.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed. Please verify credentials.');
     } finally {
       setLoading(false);
     }
