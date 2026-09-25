@@ -1,4 +1,29 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700&display=swap');
+
+@theme {
+  --color-terracotta: #B84A28;
+  --color-terracotta-hover: #9E3E20;
+  --color-terracotta-light: #FBF0EB;
+  --color-gold: #B8860B;
+  --color-gold-light: #FBF5E6;
+  --color-tulsi: #2D5A43;
+  --color-tulsi-light: #EBF3EE;
+  
+  --color-background: #F9F6F0;
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #F3ECE1;
+  --color-border: #E8DEC8;
+  --color-border-subtle: rgba(184, 134, 11, 0.15);
+
+  --color-text-primary: #1C1916;
+  --color-text-secondary: #5C5447;
+  --color-text-muted: #8A8072;
+
+  --font-serif: 'Libre Caslon Text', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mantra: 'Cinzel', 'Libre Caslon Text', serif;
+}
 
 :root {
   /* Sacred Vedic Palette - Light Mode */
@@ -229,22 +254,22 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, var(--color-terracotta) 0%, #A33C1D 100%);
+  background: var(--color-terracotta);
   color: #FFFFFF;
   font-family: var(--font-family-sans);
   font-size: 14px;
   font-weight: 600;
   padding: 12px 24px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(184, 74, 40, 0.25);
+  
   transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(184, 74, 40, 0.35);
+  
 }
 
 .btn-secondary {
@@ -258,7 +283,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 14px;
   font-weight: 600;
   padding: 12px 24px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -277,7 +302,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-text-gold);
   border: 1px solid rgba(184, 134, 11, 0.25);
   padding: 4px 10px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -292,7 +317,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-tulsi);
   border: 1px solid rgba(45, 90, 67, 0.25);
   padding: 4px 10px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.05em;

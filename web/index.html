@@ -3,11 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Pratha</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        body { margin: 0; background-color: #FAF8F5; }
+        .web-splash { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
+        .web-splash-om { font-size: 42px; color: #D15E41; margin-bottom: 12px; font-weight: bold; }
+        .web-splash-brand { font-size: 24px; color: #3A322C; font-weight: 700; letter-spacing: 0.1em; }
+        .web-splash-spinner { margin-top: 24px; width: 32px; height: 32px; border: 3px solid rgba(209, 94, 65, 0.2); border-top-color: #D15E41; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      </style>
+      <div class="web-splash">
+        <div class="web-splash-om">ॐ</div>
+        <div class="web-splash-brand">PRATHA</div>
+        <div class="web-splash-spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
