@@ -121,7 +121,7 @@ export function PujaDiscovery() {
       {/* Editorial Sanctuary Header Banner */}
       <motion.section  className="flex flex-col gap-4 pt-4">
         <div className="flex items-center gap-2">
-          <div className="bg-gold-light text-[#9E6F05] px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-[rgba(184,134,11,0.2)]">
+          <div className="bg-gold-light text-gold px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 border border-border-subtle">
             <ShieldCheck size={14} /> Vedic Rituals & Archana
           </div>
         </div>

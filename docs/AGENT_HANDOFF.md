@@ -93,6 +93,15 @@ PostgREST reminder: to-one embeds return objects, not arrays (`row.temples?.name
 - QA round 1 bugs fixed: booking modal Rules-of-Hooks crash, event 300 ambiguous embed, Gaushala `gaushala_id=eq.All` 400, wrong `welfare_stats` fields, array-shaped embeds.
 - Migrations 012/013 applied via MCP: 39 FK indexes created (140 public indexes total), `pg_trgm` in `extensions`, `get_edge_secret` granted to service_role only (anon rejected with 42501).
 - `rishi-ask` Edge Function v3 live: no auth header → 401, publishable-key-only → 401, signed-in user → 200 with a real Gemini `gemini-2.5-flash` response.
+- **Android emulator E2E (Pixel_9 AVD)**: debug APK installs, launches, safe-area insets correct (see below), `/profile` redirects signed-out users to `/login`, email/password sign-in against hosted Supabase succeeds and the session persists across app reinstalls. Demo account `pratha.demo.client@gmail.com` (server-confirmed email) is the client-testing credential.
+- Emulator caveat: the WebView renderer occasionally crashes on cold boot under the software GPU (`swiftshader`), freezing the app on "Restoring Sacred Session". Force-stop + relaunch recovers. Verify on hardware before assuming an app bug.
+
+## Android edge-to-edge & theme
+
+- `@capawesome/capacitor-android-edge-to-edge-support` is required on Android 15+: Android WebView never populates `env(safe-area-inset-*)`; the plugin injects real insets so the existing `env()` CSS works. Without it the header renders under the status bar.
+- Theme is `data-theme`-driven (`web/src/lib/theme.ts`), not `prefers-color-scheme` media queries: `localStorage["pratha-theme"]` = `light|dark|system`; `index.html` sets `data-theme` before first paint; dark tokens live under `:root[data-theme='dark']`; `@custom-variant dark` makes Tailwind `dark:` utilities follow the attribute. Settings tab → Appearance segmented control. `@capacitor/status-bar` syncs status-bar icon contrast.
+- `/profile` is wrapped in `RequireAuth` (redirects to `/login` signed-out) — other routes stay public by design; booking/contribution modals gate per-action.
+- `.action-tile` is shared by `<Link>` and `<button>` (Rishi tile); it needs `text-align: left`/`font: inherit` normalization or the button centers its text.
 
 ## Remaining blockers (external)
 
@@ -115,5 +124,6 @@ cd web && npx cap sync android && cd android && ANDROID_HOME=~/Android/Sdk ./gra
 
 ## Delivery state
 
-- PR #1 open on this branch; never push directly to `main`.
+- PR #1 merged into `main` (squash `20b4934`); subsequent fixes are pushed to `main`.
+- GitHub releases carry the debug APKs (`v1.1.0`, `v1.1.1`). Debug-signed only — Play Store needs a release-signed AAB with the user's keystore.
 - No secret values belong in this file or commits.

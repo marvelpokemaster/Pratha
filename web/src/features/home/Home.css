@@ -87,8 +87,11 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  text-align: left;
   text-decoration: none;
   color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: inherit;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
@@ -127,6 +130,10 @@
 .action-tile.rishi .action-icon-circle {
   background: rgba(142, 68, 173, 0.12);
   color: #8E44AD;
+}
+
+[data-theme='dark'] .action-tile.rishi .action-icon-circle {
+  color: #C39BD3;
 }
 
 .action-title {

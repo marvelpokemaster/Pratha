@@ -9,8 +9,12 @@ import {
   Flame,
   Users,
   FileCheck,
-  ArrowRight
+  ArrowRight,
+  Sun,
+  Moon,
+  MonitorSmartphone
 } from 'lucide-react';
+import { useThemeMode, setThemeMode } from '@/lib/theme';
 import { getProfile, getDonations, getFamily, addFamilyMember, type Donation, type FamilyMember } from '@/lib/api/profile';
 import { getBookings, type PujaBooking } from '@/lib/api/puja';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -19,6 +23,7 @@ import './Profile.css';
 
 export function Profile() {
   const { user, signOut } = useAuth();
+  const themeMode = useThemeMode();
   const [activeTab, setActiveTab] = useState<'seva' | 'pujas' | 'family' | 'settings'>('seva');
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [memberName, setMemberName] = useState('');
@@ -347,6 +352,27 @@ export function Profile() {
 
       {activeTab === 'settings' && (
         <div className="profile-content-panel">
+          <div className="activity-item-card appearance-card">
+            <div>
+              <h4 className="activity-meta-title">Appearance</h4>
+              <p className="activity-meta-sub">Light, dark, or follow your device</p>
+            </div>
+            <div className="appearance-toggle hide-scrollbar">
+              {(['light', 'system', 'dark'] as const).map((m) => (
+                <button
+                  key={m}
+                  className={`appearance-btn ${themeMode === m ? 'active' : ''}`}
+                  onClick={() => setThemeMode(m)}
+                >
+                  {m === 'light' && <Sun size={13} />}
+                  {m === 'system' && <MonitorSmartphone size={13} />}
+                  {m === 'dark' && <Moon size={13} />}
+                  <span>{m === 'system' ? 'System' : m === 'light' ? 'Light' : 'Dark'}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="activity-item-card">
             <div>
               <h4 className="activity-meta-title">Sacred Notifications</h4>

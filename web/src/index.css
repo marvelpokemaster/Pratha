@@ -1,4 +1,6 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700&display=swap');
 
 @theme {
@@ -93,10 +95,26 @@
 
   /* Spacing */
   --spacing-page-pad: 20px;
+
+  /* Alert */
+  --color-error-text: #A43D2E;
+  --color-error-bg: #FDF0ED;
+  --color-error-border: #F3C9BF;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+.alert-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-error-text);
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+:root[data-theme='dark'] {
     /* Sacred Vedic Palette - Dark Mode */
     --color-terracotta: #E07A5F;
     --color-terracotta-hover: #F28E73;
@@ -131,12 +149,16 @@
     --color-on-secondary: #12100E;
     --color-accent: #D4A373;
 
+    /* Alert */
+    --color-error-text: #F09A82;
+    --color-error-bg: rgba(224, 122, 95, 0.12);
+    --color-error-border: rgba(224, 122, 95, 0.3);
+
     /* Shadows */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.6);
     --shadow-gold: 0 4px 20px rgba(233, 196, 106, 0.15);
-  }
 }
 
 * {
