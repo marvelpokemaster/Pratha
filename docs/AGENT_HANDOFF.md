@@ -6,8 +6,8 @@
 |---|---|
 | Last updated | 2026-09-26 |
 | Branch | `devin/1790111517-pratha-supabase-platform` (PR #1, open) |
-| Current phase | Hosted Supabase integration complete for catalog/Auth/booking/contribution; external-credential work remains |
-| Overall status | **Not production-ready.** Web, Android and Expo builds pass; hosted RLS/RPC flows verified end-to-end. Payments, AI/notification Edge Functions, custom SMTP and Auth dashboard settings are blocked on credentials/approvals |
+| Current phase | Hosted Supabase integration complete for catalog/Auth/booking/contribution; `rishi-ask` Edge Function live; external-credential work remains |
+| Overall status | **Not production-ready.** Web, Android and Expo builds pass; hosted RLS/RPC flows verified end-to-end; AI works via deployed Edge Function with Cloudflare Worker fallback. Payments, notification provider, custom SMTP and Auth dashboard settings are blocked on credentials/approvals |
 
 ## Product and architecture
 
@@ -39,10 +39,16 @@ Applied migrations (all hosted):
 9. `20260926000200_009_live_darshan_seed.sql` — `live_streams` demo rows using `website` provider to official portals (no stable official 24/7 stream exists; YouTube embeds supported by the UI).
 10. `20260926000300_010_booking_status_enum_cast.sql` — `create_puja_booking` cast of CASE result to `booking_status`.
 11. `20260926000400_011_booking_rpc_searchpath.sql` — restores `search_path = public, extensions` and generates refs from `gen_random_uuid()` (010 had dropped pgcrypto from the path → `gen_random_bytes does not exist`).
+12. `20260926000500_012_indexes_and_extension_schema.sql` — 39 covering indexes on unindexed FKs + `pg_trgm` moved to `extensions` schema (advisor findings).
+13. `20260926000600_013_edge_secret_accessor.sql` — `supabase_vault` extension + `public.get_edge_secret(text)` SECURITY DEFINER accessor granted to `service_role` only. The `gemini_api_key` vault secret was created via MCP (values never live in migration files).
 
 Security model (verified via MCP): RLS enabled on all public tables; six policy helpers executable by anon/authenticated (intended); booking/contribution RPCs authenticated-only; payment/notification functions service-role-only; `profiles` has own-row SELECT/UPDATE only (rows created by `handle_new_user` trigger, so the client uses UPDATE, never UPSERT); bookings/contributions writable only through RPCs.
 
-Advisor findings (2026-09-26, security): `anon/authenticated_security_definer_function_executable` for the six policy helpers — intentional, documented above; they only inspect `auth.uid()` roles. Authenticated-callable SECURITY DEFINER RPCs (`create_puja_booking`, `create_contribution`, `cancel_puja_booking`, `complete_booking`, `generate_vaccine_alerts`, `recompute_trust_score`) — the latter three should be audited for internal role checks before production. `pg_trgm` in `public` schema; leaked-password protection disabled (dashboard toggle). Performance advisors: many unindexed FKs.
+Advisor findings (2026-09-26, security): `anon/authenticated_security_definer_function_executable` for the six policy helpers — intentional, documented above; they only inspect `auth.uid()` roles. `complete_booking`, `generate_vaccine_alerts`, `recompute_trust_score` were audited and already contain internal role checks (`manages_temple`, `manages_gaushala`, `is_gaushala_admin`). `pg_trgm` moved out of `public` (012); all unindexed FKs covered (012). Remaining: leaked-password protection disabled (dashboard toggle, needs user).
+
+Edge Function `rishi-ask` (deployed, `verify_jwt` + in-function `auth.getUser()` check; anon key alone rejected): Gemini key resolves from `GEMINI_API_KEY` function secret, else the `gemini_api_key` vault secret via `get_edge_secret`. `AI_MODEL` env overrides `gemini-2.5-flash`. Source: `supabase/functions/rishi-ask/index.ts`; client: `web/src/lib/api/ai.ts` falls back to the Worker on function failure.
+
+The Cloudflare Worker `utsavam-backend` is deployed under a different Cloudflare account (`utsavam-api` workers.dev subdomain) than the one this environment's Cloudflare MCP can see — redeploying it to add JWT verification to `/api/v1/ai/ask` needs wrangler login for that account. Its unauthenticated AI route remains as fallback; treat as quota-exposure debt.
 
 ## Current implementation status
 
@@ -55,9 +61,10 @@ Advisor findings (2026-09-26, security): `anon/authenticated_security_definer_fu
 | Seva contributions | Working (unpaid) | Real published campaigns; `create_contribution` RPC; rows stay `created` until a payment flow exists |
 | Profile/family | Working | Profile UPDATE and family insert verified via hosted E2E |
 | Supabase Auth | Working, config pending | Email confirmation enforced; forgot-password + recovery screen in `Auth.tsx`; reset email hit default SMTP rate limit |
-| Firebase/Worker retirement | Partial | Rishi AI Worker path kept as explicit fallback |
+| Firebase/Worker retirement | Partial | Rishi primary = `rishi-ask` Edge Function (verified 200 with user JWT); Worker kept as unauthenticated fallback |
 | Payments | Blocked | Needs Razorpay sandbox keys + webhook Edge Function + sandbox validation |
-| AI / notification Edge Functions | Blocked | Needs Gemini key, notification provider creds, Supabase PAT/CLI to deploy |
+| AI Edge Function | Working | `rishi-ask` deployed and verified; Gemini key in vault; signed-in-only |
+| Notification Edge Function | Blocked | Needs notification provider credentials |
 | Expo | Passing | `tsc --noEmit` clean; `expo export --platform web` succeeds |
 | Android | Passing | `npx cap sync android` + `./gradlew assembleDebug` pass (set `ANDROID_HOME=~/Android/Sdk`) |
 
@@ -84,17 +91,17 @@ PostgREST reminder: to-one embeds return objects, not arrays (`row.temples?.name
 - Hosted E2E (`node web/scripts/e2e-hosted.mjs`): 19/19 passed — confirmed sign-in, anon reads, anon RPC rejection, profile update, cross-user insert rejection, family insert, booking validation errors, free/paid bookings, owner RLS reads, direct-insert rejection, contribution, cancellation.
 - Browser QA (Python Playwright + system Chromium; the Playwright MCP needs `/opt/google/chrome/chrome`, which is not installed): 20 desktop (1440×900) + mobile (390×844) route checks with no console errors and no HTTP 300/4xx/5xx. Signed-in UI booking `PRT-192CBE75` and ₹10 contribution `4e025aae-…` verified in hosted rows via MCP (booking `confirmed` for 2026-09-27; contribution `created`, 1000 paise, campaign `50000000-…-0001`). Signed-out booking/donation redirect to `/login`.
 - QA round 1 bugs fixed: booking modal Rules-of-Hooks crash, event 300 ambiguous embed, Gaushala `gaushala_id=eq.All` 400, wrong `welfare_stats` fields, array-shaped embeds.
+- Migrations 012/013 applied via MCP: 39 FK indexes created (140 public indexes total), `pg_trgm` in `extensions`, `get_edge_secret` granted to service_role only (anon rejected with 42501).
+- `rishi-ask` Edge Function v3 live: no auth header → 401, publishable-key-only → 401, signed-in user → 200 with a real Gemini `gemini-2.5-flash` response.
 
 ## Remaining blockers (external)
 
-1. Razorpay sandbox key/secret + webhook secret → payment order/webhook Edge Functions + sandbox validation.
-2. Gemini API key → AI Edge Function to replace the Rishi Worker fallback.
-3. Notification provider credentials → notification Edge Function.
-4. Supabase PAT or CLI access for Edge Function deployment/secrets.
-5. Custom SMTP in Supabase Auth (default mailer rate-limits reset/confirmation emails).
-6. Dashboard: Auth Site URL/redirect allow-list for production + Capacitor/Expo deep links; enable leaked-password protection.
-7. Audit `complete_booking`, `generate_vaccine_alerts`, `recompute_trust_score` role checks; index hot FKs before production data.
-8. `npm install` reports 10 moderate audit findings (not yet triaged).
+1. **Razorpay** sandbox key/secret + webhook secret → payment order/webhook Edge Functions + sandbox validation.
+2. **Resend** (chosen SMTP provider): needs an API key + verified sending domain from the user, then either the user configures Authentication → SMTP Settings in the dashboard, or supplies a Supabase Management PAT so it can be set via API. Until then the default mailer rate-limits reset/confirmation emails.
+3. **Notification provider** credentials → notification Edge Function.
+4. **Cloudflare account access** for the account owning `utsavam-backend` (wrangler login or API token) → add JWT verification to the Worker AI fallback, or retire it.
+5. **Dashboard (user):** Auth Site URL/redirect allow-list for production + Capacitor/Expo deep links; enable leaked-password protection (Authentication → Password protection).
+6. `npm audit`: 10 moderate findings, not yet triaged.
 
 ## Commands
 
