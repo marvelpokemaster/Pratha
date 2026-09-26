@@ -97,8 +97,8 @@ PostgREST reminder: to-one embeds return objects, not arrays (`row.temples?.name
 ## Remaining blockers (external)
 
 1. **Razorpay** sandbox key/secret + webhook secret → payment order/webhook Edge Functions + sandbox validation.
-2. **Resend** (chosen SMTP provider): needs an API key + verified sending domain from the user, then either the user configures Authentication → SMTP Settings in the dashboard, or supplies a Supabase Management PAT so it can be set via API. Until then the default mailer rate-limits reset/confirmation emails.
-3. **Notification provider** credentials → notification Edge Function.
+2. **Resend SMTP — user must apply settings** (Supabase Auth config can't be changed via MCP; needs dashboard or Management PAT). In Dashboard → Project Settings → Authentication → SMTP Settings, enable custom SMTP: host `smtp.resend.com`, port `465` (or `587`), username `resend`, password = the Resend API key, sender email = an address on a **verified Resend domain** (a send-only key cannot verify domains; without one, `onboarding@resend.dev` only delivers to the account owner's inbox). The key is stored in vault as `resend_api_key` for future notification functions — never committed.
+3. **Razorpay** — client-side dependency: client hasn't provided credentials; payment order/webhook Edge Functions stay unimplemented until they do.
 4. **Cloudflare account access** for the account owning `utsavam-backend` (wrangler login or API token) → add JWT verification to the Worker AI fallback, or retire it.
 5. **Dashboard (user):** Auth Site URL/redirect allow-list for production + Capacitor/Expo deep links; enable leaked-password protection (Authentication → Password protection).
 6. `npm audit`: 10 moderate findings, not yet triaged.
