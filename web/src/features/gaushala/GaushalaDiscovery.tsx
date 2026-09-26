@@ -18,8 +18,8 @@ export function GaushalaDiscovery() {
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['animals', filter],
-    queryFn: () => getAnimals(filter),
+    queryKey: ['animals'],
+    queryFn: () => getAnimals(),
   });
 
   const getCuratedCowImage = (name: string) => {
@@ -30,13 +30,20 @@ export function GaushalaDiscovery() {
   };
 
   const defaultAnimals: Animal[] = [
-    { id: 'cow_nandi_01', name: 'Nandi (Sahiwal)', breed: 'Sahiwal', ageStr: '4 Years', imageUrl: IMAGES.animals.nandi, story: 'Rescued from highway traffic.'},
-    { id: 'cow_surabhi_02', name: 'Surabhi (Gir)', breed: 'Gir', ageStr: '6 Years', imageUrl: IMAGES.animals.nandini, story: 'Abandoned by dairy farmers.'},
-    { id: 'calf_kapila_03', name: 'Kapila', breed: 'Tharparkar', ageStr: '3 Months', imageUrl: IMAGES.animals.gauri, story: 'Found wandering near the forest edge.'},
+    { id: 'cow_nandi_01', name: 'Nandi (Sahiwal)', breed: 'Sahiwal', ageStr: '4 Years', ageMonths: 48, imageUrl: IMAGES.animals.nandi, story: 'Rescued from highway traffic.'},
+    { id: 'cow_surabhi_02', name: 'Surabhi (Gir)', breed: 'Gir', ageStr: '6 Years', ageMonths: 72, imageUrl: IMAGES.animals.nandini, story: 'Abandoned by dairy farmers.'},
+    { id: 'calf_kapila_03', name: 'Kapila', breed: 'Tharparkar', ageStr: '3 Months', ageMonths: 3, imageUrl: IMAGES.animals.gauri, story: 'Found wandering near the forest edge.'},
   ];
 
   const animals = (data?.animals && data.animals.length > 0) ? data.animals : defaultAnimals;
-  const filtered = animals.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = animals.filter((animal) => {
+    const matchesSearch = animal.name.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = filter === 'All'
+      || (filter === 'Needs Medical' && Boolean(animal.healthStatus) && animal.healthStatus !== 'healthy')
+      || (filter === 'Calves' && animal.ageMonths !== undefined && animal.ageMonths < 12)
+      || ((filter === 'Sahiwal' || filter === 'Gir') && animal.breed?.toLowerCase().includes(filter.toLowerCase()));
+    return matchesSearch && matchesFilter;
+  });
 
   const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 

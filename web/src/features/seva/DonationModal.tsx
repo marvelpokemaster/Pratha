@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { X, CheckCircle, Heart, Sparkles, Loader2 } from 'lucide-react';
-import { createDonation } from '@/lib/api/profile';
+import { useQuery } from '@tanstack/react-query';
+import { X, CheckCircle, Heart, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { createDonation, getSevaCampaigns } from '@/lib/api/profile';
 import { useAuth } from '@/features/auth/AuthContext';
 
 interface DonationModalProps {
@@ -10,19 +11,28 @@ interface DonationModalProps {
   defaultAmount?: number;
 }
 
-export function DonationModal({ 
-  isOpen, 
-  onClose, 
-  defaultInitiative = 'Monsoon Green Fodder & Hay', 
-  defaultAmount = 1100 
+export function DonationModal({
+  isOpen,
+  onClose,
+  defaultInitiative,
+  defaultAmount = 1100
 }: DonationModalProps) {
   const { user } = useAuth();
   const [amount, setAmount] = useState<number>(defaultAmount);
   const [customAmount, setCustomAmount] = useState('');
-  const [initiative, setInitiative] = useState(defaultInitiative);
+  const [campaignId, setCampaignId] = useState<string>(defaultInitiative || '');
   const [dedication, setDedication] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [receiptId, setReceiptId] = useState<string | null>(null);
+
+  const { data: campaigns } = useQuery({
+    queryKey: ['seva-campaigns'],
+    queryFn: () => getSevaCampaigns(),
+    enabled: isOpen,
+  });
+  const activeCampaign = (campaigns ?? []).find((c) => c.id === campaignId) || campaigns?.[0];
+  const initiative = activeCampaign?.title || 'Gaushala Seva';
 
   if (!isOpen) return null;
 
@@ -30,27 +40,29 @@ export function DonationModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     const finalAmount = customAmount ? parseInt(customAmount, 10) : amount;
-    if (!finalAmount || isNaN(finalAmount)) return;
+    if (!finalAmount || isNaN(finalAmount) || finalAmount < 10) {
+      setError('The minimum offering is ₹10.');
+      return;
+    }
 
+    if (!user) {
+      onClose();
+      window.location.assign('/login');
+      return;
+    }
     setLoading(true);
     try {
-      if (!user) {
-        onClose();
-        window.location.assign('/login');
-        return;
-      }
       const res = await createDonation({
         amountRupees: finalAmount,
-        targetType: 'SEVA_INITIATIVE',
-        targetName: initiative,
-        sevaCategory: 'Gaushala Welfare',
+        campaignId: activeCampaign?.id,
         dedication: dedication.trim() || undefined,
       });
 
-      setReceiptId(res.donationId || `TXN-${Date.now().toString().slice(-6)}`);
-    } catch (e: any) {
-      setReceiptId(`TXN-${Date.now().toString().slice(-6)}`);
+      setReceiptId(res.donationId);
+    } catch (err: any) {
+      setError(err instanceof Error ? err.message : 'The offering could not be recorded. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -83,10 +95,10 @@ export function DonationModal({
               Devotee {user?.user_metadata?.display_name || 'Seeker'}, your contribution of <strong>₹{customAmount || amount}</strong> for <em>{initiative}</em> has been offered to Shri Krishna Gaushala.
             </p>
             <div className="badge-gold my-2">
-              Receipt No: {receiptId} • Offering Confirmed
+              Contribution Ref: {receiptId}
             </div>
             <p className="text-xs text-text-muted">
-              Your contribution receipt and acknowledgment have been recorded in your Devotee Profile.
+              Your contribution is recorded in your Devotee Profile. A receipt is issued once payment is confirmed.
             </p>
             <button className="btn-primary mt-4" onClick={onClose}>
               Done
@@ -98,15 +110,21 @@ export function DonationModal({
               <label className="text-xs font-semibold uppercase text-muted tracking-wider block mb-1">
                 Select Initiative
               </label>
-              <select 
+              <select
                 className="form-input w-full"
-                value={initiative}
-                onChange={(e) => setInitiative(e.target.value)}
+                value={campaignId}
+                onChange={(e) => setCampaignId(e.target.value)}
               >
-                <option value="Monsoon Green Fodder & Hay">Monsoon Green Fodder & Hay (Daily Nutrition)</option>
-                <option value="Veterinary Healing & Herbal Medicine">Veterinary Healing & Herbal Medicine (Hospital Shed)</option>
-                <option value="Sanctuary Shelter & Winter Bedding">Sanctuary Shelter & Winter Bedding (Infrastructure)</option>
+                {(campaigns ?? []).map((c) => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+                {(!campaigns || campaigns.length === 0) && (
+                  <option value="">General Gaushala Seva</option>
+                )}
               </select>
+              {activeCampaign?.description && (
+                <p className="text-xs text-text-muted mt-1.5">{activeCampaign.description}</p>
+              )}
             </div>
 
             <div>
@@ -145,6 +163,13 @@ export function DonationModal({
                 onChange={(e) => setDedication(e.target.value)}
               />
             </div>
+
+            {error && (
+              <div className="flex items-start gap-2 text-sm text-[#a43d2e] bg-[#fdf0ed] border border-[#f3c9bf] rounded-lg px-3 py-2.5" role="alert">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <button 
               type="submit" 

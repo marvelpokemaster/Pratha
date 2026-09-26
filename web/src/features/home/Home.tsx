@@ -46,7 +46,7 @@ export function Home() {
   };
 
   const totalRescued = welfareData?.totalRescued || 450;
-  const totalMeals = welfareData?.totalMealsServed || 13500;
+  const publishedTemples = welfareData?.publishedTemples ?? 0;
 
   return (
     <div className="home-page">
@@ -178,8 +178,8 @@ export function Home() {
             <Activity size={22} />
           </div>
           <div>
-            <div className="impact-stat">{totalMeals.toLocaleString()}+</div>
-            <div className="impact-stat-label">Sacred Meals Offered</div>
+            <div className="impact-stat">{publishedTemples.toLocaleString()}</div>
+            <div className="impact-stat-label">Published Temples</div>
           </div>
         </div>
 

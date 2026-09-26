@@ -15,6 +15,10 @@ import { Profile } from '@/features/profile/Profile';
 
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { Discover } from '@/features/discover/Discover';
+import { TempleDetail } from '@/features/discover/TempleDetail';
+import { EventDetail } from '@/features/discover/EventDetail';
+import { FestivalDetail } from '@/features/discover/FestivalDetail';
+import { LiveDarshan, LiveDarshanDetail } from '@/features/discover/LiveDarshan';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -24,6 +28,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const queryClient = new QueryClient();
+// Re-exported so the Expo DOM bridge shares this module copy; a second
+// react-query instance would split the provider context at runtime.
+export { QueryClientProvider } from '@tanstack/react-query';
 
 export function PrathaAppContent() {
   return (
@@ -39,6 +46,11 @@ export function PrathaAppContent() {
       >
         <Route path="/" element={<Home />} />
         <Route path="/discover" element={<Discover />} />
+        <Route path="/temples/:slug" element={<TempleDetail />} />
+        <Route path="/events/:slug" element={<EventDetail />} />
+        <Route path="/festivals/:slug" element={<FestivalDetail />} />
+        <Route path="/darshan" element={<LiveDarshan />} />
+        <Route path="/darshan/:id" element={<LiveDarshanDetail />} />
         <Route path="/pujas" element={<PujaDiscovery />} />
         <Route path="/gaushala" element={<GaushalaDiscovery />} />
         <Route path="/gaushala/animal/:id" element={<AnimalPassport />} />
