@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { signInWithGoogle } from '@/lib/auth/oauth';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -247,13 +248,32 @@ export function Auth() {
             )}
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn-primary auth-submit-btn"
             disabled={loading}
           >
             <span>{loading ? 'Processing...' : (isLogin ? 'Enter App' : 'Begin Journey')}</span>
             <ArrowRight size={16} />
+          </button>
+
+          <button
+            type="button"
+            className="btn-secondary auth-submit-btn"
+            disabled={loading}
+            onClick={async () => {
+              setError('');
+              setNotice('');
+              setLoading(true);
+              try {
+                await signInWithGoogle();
+              } catch (err) {
+                setError(err instanceof Error ? err.message : 'Google sign-in failed. Please try again.');
+                setLoading(false);
+              }
+            }}
+          >
+            <span>{loading ? 'Opening Google...' : 'Continue with Google'}</span>
           </button>
         </form>
         )}

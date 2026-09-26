@@ -1,8 +1,11 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import { AppShell } from '@/components/layout/AppShell';
+import { handleAuthDeepLink } from '@/lib/auth/oauth';
 
 import { Home } from '@/features/home/Home';
 import { Auth } from '@/features/auth/Auth';
@@ -68,6 +71,18 @@ export function PrathaAppContent() {
 export const SattvaAppContent = PrathaAppContent;
 
 export default function App() {
+  // OAuth deep links (pratha://auth/callback?code=...) arrive via the Capacitor
+  // App plugin when Google sign-in returns from the system browser.
+  React.useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const listener = CapApp.addListener('appUrlOpen', ({ url }) => {
+      void handleAuthDeepLink(url);
+    });
+    return () => {
+      listener.then((l) => l.remove());
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

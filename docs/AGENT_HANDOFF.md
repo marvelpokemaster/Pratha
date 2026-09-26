@@ -60,7 +60,7 @@ The Cloudflare Worker `utsavam-backend` is deployed under a different Cloudflare
 | Gaushala / passports | Working | Animals + `breeds(name)` + Gaushala embeds; chips filter client-side |
 | Seva contributions | Working (unpaid) | Real published campaigns; `create_contribution` RPC; rows stay `created` until a payment flow exists |
 | Profile/family | Working | Profile UPDATE and family insert verified via hosted E2E |
-| Supabase Auth | Working, config pending | Email confirmation enforced; forgot-password + recovery screen in `Auth.tsx`; reset email hit default SMTP rate limit |
+| Supabase Auth | Working | Email/password verified; forgot-password + recovery in `Auth.tsx`; Resend SMTP configured by user in dashboard; Google OAuth wired (button + `pratha://auth/callback` deep link) — needs redirect allow-list entry and a real-device test |
 | Firebase/Worker retirement | Partial | Rishi primary = `rishi-ask` Edge Function (verified 200 with user JWT); Worker kept as unauthenticated fallback |
 | Payments | Blocked | Needs Razorpay sandbox keys + webhook Edge Function + sandbox validation |
 | AI Edge Function | Working | `rishi-ask` deployed and verified; Gemini key in vault; signed-in-only |
@@ -100,7 +100,7 @@ PostgREST reminder: to-one embeds return objects, not arrays (`row.temples?.name
 2. **Resend SMTP — user must apply settings** (Supabase Auth config can't be changed via MCP; needs dashboard or Management PAT). In Dashboard → Project Settings → Authentication → SMTP Settings, enable custom SMTP: host `smtp.resend.com`, port `465` (or `587`), username `resend`, password = the Resend API key, sender email = an address on a **verified Resend domain** (a send-only key cannot verify domains; without one, `onboarding@resend.dev` only delivers to the account owner's inbox). The key is stored in vault as `resend_api_key` for future notification functions — never committed.
 3. **Razorpay** — client-side dependency: client hasn't provided credentials; payment order/webhook Edge Functions stay unimplemented until they do.
 4. **Cloudflare account access** for the account owning `utsavam-backend` (wrangler login or API token) → add JWT verification to the Worker AI fallback, or retire it.
-5. **Dashboard (user):** Auth Site URL/redirect allow-list for production + Capacitor/Expo deep links; enable leaked-password protection (Authentication → Password protection).
+5. **Dashboard (user):** Auth Site URL; add `pratha://auth/callback` (or `pratha://**`) to redirect URLs for the Android OAuth flow; enable leaked-password protection (Authentication → Password protection).
 6. `npm audit`: 10 moderate findings, not yet triaged.
 
 ## Commands
