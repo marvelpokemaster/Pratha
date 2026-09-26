@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, Flame, MapPin, HeartHandshake, User, Sparkles } from 'lucide-react';
+import { Home, Flame, MapPin, HeartHandshake, User, Sparkles, Compass } from 'lucide-react';
 import { RishiChatModal } from '@/features/ai/RishiChatModal';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
@@ -10,6 +10,7 @@ export function AppShell() {
 
   const navItems = [
     { name: 'Home', path: '/', icon: Home },
+    { name: 'Discover', path: '/discover', icon: Compass },
     { name: 'Pujas', path: '/pujas', icon: Flame },
     { name: 'Gaushala', path: '/gaushala', icon: MapPin },
     { name: 'Seva', path: '/seva', icon: HeartHandshake },

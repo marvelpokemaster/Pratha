@@ -1,8 +1,11 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import { AppShell } from '@/components/layout/AppShell';
+import { handleAuthDeepLink } from '@/lib/auth/oauth';
 
 import { Home } from '@/features/home/Home';
 import { Auth } from '@/features/auth/Auth';
@@ -14,23 +17,23 @@ import { SevaExperience } from '@/features/seva/SevaExperience';
 import { Profile } from '@/features/profile/Profile';
 
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { Discover } from '@/features/discover/Discover';
+import { TempleDetail } from '@/features/discover/TempleDetail';
+import { EventDetail } from '@/features/discover/EventDetail';
+import { FestivalDetail } from '@/features/discover/FestivalDetail';
+import { LiveDarshan, LiveDarshanDetail } from '@/features/discover/LiveDarshan';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <LoadingScreen message="Restoring Sacred Session..." subtext="Connecting to Pratha" />;
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  
+  const { loading } = useAuth();
+  if (loading) return <LoadingScreen message="Restoring Sacred Session..." subtext="Connecting to Pratha" />;
   return <>{children}</>;
 };
 
 export const queryClient = new QueryClient();
+// Re-exported so the Expo DOM bridge shares this module copy; a second
+// react-query instance would split the provider context at runtime.
+export { QueryClientProvider } from '@tanstack/react-query';
 
 export function PrathaAppContent() {
   return (
@@ -45,6 +48,12 @@ export function PrathaAppContent() {
         }
       >
         <Route path="/" element={<Home />} />
+        <Route path="/discover" element={<Discover />} />
+        <Route path="/temples/:slug" element={<TempleDetail />} />
+        <Route path="/events/:slug" element={<EventDetail />} />
+        <Route path="/festivals/:slug" element={<FestivalDetail />} />
+        <Route path="/darshan" element={<LiveDarshan />} />
+        <Route path="/darshan/:id" element={<LiveDarshanDetail />} />
         <Route path="/pujas" element={<PujaDiscovery />} />
         <Route path="/gaushala" element={<GaushalaDiscovery />} />
         <Route path="/gaushala/animal/:id" element={<AnimalPassport />} />
@@ -62,6 +71,18 @@ export function PrathaAppContent() {
 export const SattvaAppContent = PrathaAppContent;
 
 export default function App() {
+  // OAuth deep links (pratha://auth/callback?code=...) arrive via the Capacitor
+  // App plugin when Google sign-in returns from the system browser.
+  React.useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const listener = CapApp.addListener('appUrlOpen', ({ url }) => {
+      void handleAuthDeepLink(url);
+    });
+    return () => {
+      listener.then((l) => l.remove());
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

@@ -5,7 +5,7 @@ import PrathaDomBridge from './src/PrathaDomBridge';
 export default function App() {
   return (
     <View style={styles.container}>
-      <StatusBar style="light" backgroundColor="#1E1B18" />
+      <StatusBar style="light" />
       <PrathaDomBridge 
         initialRoute="/"
         dom={{

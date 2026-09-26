@@ -10,8 +10,6 @@ export function SevaExperience() {
   const [modalOpen, setModalOpen] = useState(false);
 
   const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as any, stiffness: 300, damping: 24 } } };
-
   return (
     <motion.div variants={containerVariants} className="flex flex-col gap-8 md:gap-12 pb-10">
       

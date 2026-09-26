@@ -1,0 +1,49 @@
+.card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Variants */
+.card-default {
+  background-color: var(--color-surface-container-low);
+}
+
+.card-elevated {
+  background-color: var(--color-surface);
+  /* The system avoids heavy drop shadows, using tonal layering. */
+}
+
+.card-glass {
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  .card-default {
+    background-color: var(--color-surface-container);
+  }
+  .card-elevated {
+    background-color: var(--color-surface);
+  }
+  .card-glass {
+    background-color: rgba(25, 37, 15, 0.6);
+    border: 1px solid rgba(217, 197, 178, 0.2);
+  }
+}
+
+/* Padding */
+.card-pad-none {
+  padding: 0;
+}
+.card-pad-sm {
+  padding: var(--spacing-stack-sm);
+}
+.card-pad-md {
+  padding: var(--spacing-stack-md);
+}
+.card-pad-lg {
+  padding: var(--spacing-stack-lg);
+}

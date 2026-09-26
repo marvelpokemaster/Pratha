@@ -1,9 +1,8 @@
 'use dom';
 
 import { MemoryRouter } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../../web/src/features/auth/AuthContext';
-import { queryClient, PrathaAppContent } from '../../web/src/App';
+import { queryClient, QueryClientProvider, PrathaAppContent } from '../../web/src/App';
 import '../../web/src/index.css';
 
 interface PrathaDomBridgeProps {

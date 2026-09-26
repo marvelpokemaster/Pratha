@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, CheckCircle, MapPin, Clock, Flame, User, Sparkles, Loader2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { X, CheckCircle, MapPin, Clock, Flame, User, Sparkles, Loader2, AlertCircle, CalendarDays } from 'lucide-react';
 import { createBooking, type Puja } from '@/lib/api/puja';
 import { useAuth } from '@/features/auth/AuthContext';
 import { IMAGES } from '@/lib/images';
@@ -10,41 +10,93 @@ interface PujaDetailModalProps {
   onClose: () => void;
 }
 
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function toISODate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
 export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
   const { user } = useAuth();
-  const [sankalpaName, setSankalpaName] = useState(user?.displayName || '');
+  const [sankalpaName, setSankalpaName] = useState(user?.user_metadata?.display_name || '');
   const [gotra, setGotra] = useState('');
   const [nakshatra, setNakshatra] = useState('');
   const [familyMembers, setFamilyMembers] = useState('');
+  const [bookingDate, setBookingDate] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [prasadam, setPrasadam] = useState<'none' | 'collect' | 'post'>('none');
   const [loading, setLoading] = useState(false);
-  const [successBookingId, setSuccessBookingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [successBooking, setSuccessBooking] = useState<{ ref: string; status?: string } | null>(null);
+
+  const leadDays = puja?.leadTimeDays ?? 0;
+  const minDate = useMemo(() => toISODate(new Date(Date.now() + leadDays * 86400000)), [leadDays]);
+  const availableDays = puja?.availableDays ?? [0, 1, 2, 3, 4, 5, 6];
+  const allDaysAvailable = availableDays.length === 7;
+  const availabilityHint = allDaysAvailable
+    ? 'Performed every day'
+    : `Performed on ${availableDays.map((d) => DAY_NAMES[d]).join(', ')}`;
+  // Curated fallback listings are not hosted offerings, so the RPC can't book them.
+  const isHostedOffering = puja ? UUID_RE.test(puja.id) : false;
 
   if (!puja) return null;
 
+  const validateDate = (dateStr: string): string | null => {
+    if (!dateStr) return 'Please select a date for the ritual.';
+    if (dateStr < minDate) {
+      return leadDays > 0
+        ? `This offering needs at least ${leadDays} day${leadDays === 1 ? '' : 's'} of advance notice.`
+        : 'Please pick a date from today onward.';
+    }
+    const dow = new Date(`${dateStr}T00:00:00`).getDay();
+    if (!availableDays.includes(dow)) {
+      return `This offering is not performed on ${DAY_NAMES[dow]}. ${availabilityHint}.`;
+    }
+    return null;
+  };
+
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sankalpaName.trim()) return;
+    setError(null);
+    if (!sankalpaName.trim()) {
+      setError('Please enter the devotee name for the Sankalpa.');
+      return;
+    }
+    if (puja.requiresNakshatra && !nakshatra.trim()) {
+      setError('Please provide the devotee\u2019s Nakshatra (birth star).');
+      return;
+    }
+    const dateError = validateDate(bookingDate);
+    if (dateError) {
+      setError(dateError);
+      return;
+    }
+    if (!isHostedOffering) {
+      setError('Online booking is not enabled for this curated listing yet.');
+      return;
+    }
+    if (!user) {
+      onClose();
+      window.location.assign('/login');
+      return;
+    }
 
     setLoading(true);
     try {
-      const familyArray = familyMembers
-        ? familyMembers.split(',').map((s: string) => s.trim()).filter(Boolean)
-        : [];
-
       const res = await createBooking({
         pujaId: puja.id,
-        pujaTitle: puja.title,
-        templeName: puja.templeName,
-        amountRupees: puja.priceRupees,
+        bookingDate,
         sankalpaName: sankalpaName.trim(),
         gotra: gotra.trim() || undefined,
         nakshatra: nakshatra.trim() || undefined,
-        familyMembers: familyArray,
+        quantity,
+        prasadam,
+        notes: familyMembers.trim() ? `Family: ${familyMembers.trim()}` : undefined,
       });
-
-      setSuccessBookingId(res.bookingId || `PUJA-${Date.now().toString().slice(-6)}`);
+      setSuccessBooking({ ref: res.confirmationRef || res.bookingId, status: res.status });
     } catch (err: any) {
-      setSuccessBookingId(`PUJA-${Date.now().toString().slice(-6)}`);
+      setError(err instanceof Error ? err.message : 'The booking could not be completed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -74,23 +126,26 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
           </button>
         </div>
 
-        {successBookingId ? (
+        {successBooking ? (
           <div className="booking-success-box">
             <div className="w-14 h-14 rounded-full bg-tulsi-light flex items-center justify-center text-tulsi text-2xl">
               <CheckCircle size={36} className="text-tulsi" />
             </div>
             <h3 className="typography-headline-md text-text-primary">
-              Sankalpa Accepted
+              {successBooking.status === 'confirmed' ? 'Sankalpa Accepted' : 'Booking Recorded'}
             </h3>
             <p className="text-sm text-text-secondary max-w-md">
-              Your offering for <strong>{puja.title}</strong> at {puja.templeName} has been received. 
+              Your offering for <strong>{puja.title}</strong> at {puja.templeName}
+              {bookingDate ? ` on ${new Date(`${bookingDate}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''} has been received.
               The revered priest will chant your sacred Gotra and Nakshatra.
             </p>
             <div className="badge-gold my-2">
-              Booking Ref: {successBookingId}
+              Booking Ref: {successBooking.ref}
             </div>
             <p className="text-xs text-text-muted">
-              Live streaming link and digital prasad receipt will be sent to {user?.email || 'your registered email'}.
+              {successBooking.status === 'confirmed'
+                ? 'Your booking is confirmed. View it any time in your Profile.'
+                : 'This booking is awaiting payment. It appears under Pooja bookings in your Profile.'}
             </p>
             <button className="btn-primary mt-4" onClick={onClose}>
               Done
@@ -151,6 +206,23 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
 
                 <div className="sankalpa-fields-grid">
                   <div className="form-group">
+                    <label className="form-label">Ritual Date *</label>
+                    <input
+                      type="date"
+                      required
+                      className="form-input"
+                      min={minDate}
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                    />
+                    <p className="text-xs text-text-muted mt-1 flex items-center gap-1">
+                      <CalendarDays size={12} />
+                      {availabilityHint}
+                      {leadDays > 0 ? ` · earliest ${new Date(`${minDate}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
+                    </p>
+                  </div>
+
+                  <div className="form-group">
                     <label className="form-label">Devotee Full Name *</label>
                     <input
                       type="text"
@@ -174,14 +246,41 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Nakshatra / Birth Star</label>
+                    <label className="form-label">Nakshatra / Birth Star{puja.requiresNakshatra ? ' *' : ''}</label>
                     <input
                       type="text"
                       className="form-input"
                       placeholder="e.g. Rohini, Mrigashirsha"
+                      required={puja.requiresNakshatra}
                       value={nakshatra}
                       onChange={(e) => setNakshatra(e.target.value)}
                     />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Devotees</label>
+                    <select
+                      className="form-input"
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseInt(e.target.value, 10) || 1)}
+                    >
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>{n} {n === 1 ? 'devotee' : 'devotees'}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Prasadam</label>
+                    <select
+                      className="form-input"
+                      value={prasadam}
+                      onChange={(e) => setPrasadam(e.target.value as 'none' | 'collect' | 'post')}
+                    >
+                      <option value="none">No prasadam</option>
+                      <option value="collect">Collect at temple</option>
+                      <option value="post">Send by post</option>
+                    </select>
                   </div>
 
                   <div className="form-group">
@@ -198,11 +297,18 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
               </form>
             </div>
 
-            <footer className="puja-footer-bar">
+            <footer className="puja-footer-bar flex-col items-stretch">
+              {error && (
+                <div className="flex items-start gap-2 text-sm text-[#a43d2e] bg-[#fdf0ed] border border-[#f3c9bf] rounded-lg px-3 py-2.5 mb-3" role="alert">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-3">
               <div>
                 <span className="text-xs text-text-muted block">Seva Dakshina</span>
                 <span className="text-xl font-bold font-serif text-terracotta">
-                  ₹{puja.priceRupees}
+                  ₹{(puja.priceRupees * quantity).toLocaleString('en-IN')}
                 </span>
               </div>
 
@@ -220,10 +326,11 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
                 ) : (
                   <>
                     <Sparkles size={16} />
-                    <span>Confirm Puja Booking</span>
+                    <span>{user ? 'Confirm Puja Booking' : 'Sign in to Book'}</span>
                   </>
                 )}
               </button>
+              </div>
             </footer>
           </>
         )}

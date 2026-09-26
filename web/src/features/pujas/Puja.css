@@ -1,0 +1,187 @@
+.puja-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px 0 32px;
+}
+
+/* Compact Editorial Banner */
+.puja-header-banner {
+  background: linear-gradient(135deg, #2D1A12 0%, #1A130E 100%);
+  border: 1px solid rgba(233, 196, 106, 0.2);
+  border-radius: var(--radius-xl);
+  padding: 28px 24px;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.puja-header-banner h1 {
+  color: #FFFFFF;
+  font-size: 28px;
+}
+
+.puja-header-banner p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  max-width: 600px;
+}
+
+/* Category Filter Bar */
+.puja-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filter-chip-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.filter-chip-btn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-text-primary);
+}
+
+.filter-chip-btn.active {
+  background: var(--color-terracotta);
+  color: #FFFFFF;
+  border-color: var(--color-terracotta);
+}
+
+/* Puja Cards Grid */
+.pujas-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .pujas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.puja-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.puja-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-gold);
+}
+
+.puja-card-img-box {
+  position: relative;
+  height: 180px;
+  width: 100%;
+}
+
+.puja-card-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.puja-card-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(18, 16, 14, 0.78);
+  backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.puja-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+}
+
+.puja-location-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.puja-card-title {
+  font-family: var(--font-family-serif);
+  font-size: 19px;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.puja-card-priest {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.puja-card-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.puja-dakshina-val {
+  font-family: var(--font-family-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-terracotta);
+}
+
+.btn-book-puja {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.puja-card:hover .btn-book-puja {
+  background: var(--color-terracotta);
+  color: #FFFFFF;
+  border-color: var(--color-terracotta);
+}

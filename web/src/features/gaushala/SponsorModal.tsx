@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, CheckCircle, Heart, Sparkles, Loader2 } from 'lucide-react';
+import { X, CheckCircle, Heart, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import type { Animal } from '@/lib/api/gaushala';
 import { createDonation } from '@/lib/api/profile';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -15,6 +15,7 @@ export function SponsorModal({ animal, isOpen, onClose }: SponsorModalProps) {
   const [selectedTier, setSelectedTier] = useState<number>(1500);
   const [dedication, setDedication] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
 
   if (!isOpen || !animal) return null;
@@ -27,20 +28,25 @@ export function SponsorModal({ animal, isOpen, onClose }: SponsorModalProps) {
 
   const handleSponsor = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    if (!user) {
+      onClose();
+      window.location.assign('/login');
+      return;
+    }
     setLoading(true);
 
     try {
       const res = await createDonation({
         amountRupees: selectedTier,
-        targetType: 'ANIMAL',
-        targetName: animal.name,
-        sevaCategory: 'Cattle Welfare & Healing',
-        dedication: dedication.trim() || undefined,
+        animalId: animal.id,
+        gaushalaId: animal.gaushalaId,
+        dedication: dedication.trim() || `Sponsorship for ${animal.name}`,
       });
 
-      setSuccessId(res.donationId || `SEVA-${Date.now().toString().slice(-6)}`);
+      setSuccessId(res.donationId);
     } catch (err: any) {
-      setSuccessId(`SEVA-${Date.now().toString().slice(-6)}`);
+      setError(err instanceof Error ? err.message : 'The offering could not be recorded. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -70,11 +76,11 @@ export function SponsorModal({ animal, isOpen, onClose }: SponsorModalProps) {
               Seva Received with Blessings
             </h3>
             <p className="text-sm text-text-secondary max-w-md">
-              Thank you, {user?.displayName || 'Devotee'}, for sponsoring <strong>{animal.name}</strong>. 
+              Thank you, {user?.user_metadata?.display_name || 'Devotee'}, for sponsoring <strong>{animal.name}</strong>.
               Your compassionate offering flows directly toward daily nourishment and veterinary healing at Shri Krishna Gaushala.
             </p>
             <div className="badge-gold my-2">
-              Receipt No: {successId} • Sponsorship Recorded
+              Contribution Ref: {successId}
             </div>
             <button className="btn-primary mt-4" onClick={onClose}>
               Return to Passport
@@ -124,6 +130,13 @@ export function SponsorModal({ animal, isOpen, onClose }: SponsorModalProps) {
               <Heart size={14} className="text-terracotta" />
               <span>Direct sponsorship dedicated to {animal.name}'s daily feed and care</span>
             </div>
+
+            {error && (
+              <div className="flex items-start gap-2 text-sm text-[#a43d2e] bg-[#fdf0ed] border border-[#f3c9bf] rounded-lg px-3 py-2.5" role="alert">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <button 
               type="submit" 

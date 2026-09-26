@@ -1,110 +1,196 @@
 import { useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
-import { AnimatePresence, motion } from 'motion/react';
-import { X, HeartHandshake, Loader2, FileCheck } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { useQuery } from '@tanstack/react-query';
+import { X, CheckCircle, Heart, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { createDonation, getSevaCampaigns } from '@/lib/api/profile';
 import { useAuth } from '@/features/auth/AuthContext';
 
-const submitGaushalaDonation = async (uid: string, data: any) => {
-  return new Promise(resolve => setTimeout(resolve, 800));
-};
+interface DonationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  defaultInitiative?: string;
+  defaultAmount?: number;
+}
 
-export function DonationModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function DonationModal({
+  isOpen,
+  onClose,
+  defaultInitiative,
+  defaultAmount = 1100
+}: DonationModalProps) {
   const { user } = useAuth();
-  const [amount, setAmount] = useState('1100');
+  const [amount, setAmount] = useState<number>(defaultAmount);
+  const [customAmount, setCustomAmount] = useState('');
+  const [campaignId, setCampaignId] = useState<string>(defaultInitiative || '');
   const [dedication, setDedication] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [receiptId, setReceiptId] = useState<string | null>(null);
+
+  const { data: campaigns } = useQuery({
+    queryKey: ['seva-campaigns'],
+    queryFn: () => getSevaCampaigns(),
+    enabled: isOpen,
+  });
+  const activeCampaign = (campaigns ?? []).find((c) => c.id === campaignId) || campaigns?.[0];
+  const initiative = activeCampaign?.title || 'Gaushala Seva';
+
+  if (!isOpen) return null;
+
+  const presetAmounts = [501, 1100, 2100, 5100, 11000];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) { alert('Please sign in to donate'); return; }
-    
+    setError(null);
+    const finalAmount = customAmount ? parseInt(customAmount, 10) : amount;
+    if (!finalAmount || isNaN(finalAmount) || finalAmount < 10) {
+      setError('The minimum offering is ₹10.');
+      return;
+    }
+
+    if (!user) {
+      onClose();
+      window.location.assign('/login');
+      return;
+    }
     setLoading(true);
     try {
-      await submitGaushalaDonation(user.uid, {
-        amountRupees: parseInt(amount),
-        dedication,
-        targetId: 'general_fund',
-        targetName: 'General Gaushala Fund'
+      const res = await createDonation({
+        amountRupees: finalAmount,
+        campaignId: activeCampaign?.id,
+        dedication: dedication.trim() || undefined,
       });
-      setSuccess(true);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to process donation. Please try again.');
+
+      setReceiptId(res.donationId);
+    } catch (err: any) {
+      setError(err instanceof Error ? err.message : 'The offering could not be recorded. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const closeAndReset = () => {
-    onClose();
-    setTimeout(() => setSuccess(false), 300);
-  };
-
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && closeAndReset()}>
-      <AnimatePresence>
-        {isOpen && (
-          <Dialog.Portal forceMount>
-            <Dialog.Overlay asChild>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
-            </Dialog.Overlay>
-            <Dialog.Content asChild>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="fixed z-50 left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] w-full max-w-md bg-surface md:rounded-3xl rounded-t-3xl rounded-b-none shadow-2xl p-6 md:p-8"
+    <div className="donation-modal-backdrop" onClick={onClose}>
+      <div className="donation-modal-container" onClick={(e) => e.stopPropagation()}>
+        <header className="rishi-header">
+          <div className="flex items-center gap-2">
+            <Heart size={20} className="text-terracotta" />
+            <h3 className="font-serif text-lg font-semibold text-text-primary">
+              Sacred Gau Seva Contribution
+            </h3>
+          </div>
+          <button className="rishi-close-btn" onClick={onClose} aria-label="Close">
+            <X size={20} />
+          </button>
+        </header>
+
+        {receiptId ? (
+          <div className="booking-success-box">
+            <div className="w-14 h-14 rounded-full bg-tulsi-light flex items-center justify-center text-tulsi text-2xl">
+              <CheckCircle size={36} className="text-tulsi" />
+            </div>
+            <h3 className="typography-headline-md text-text-primary">
+              Seva Recorded with Gratitude
+            </h3>
+            <p className="text-sm text-text-secondary max-w-md">
+              Devotee {user?.user_metadata?.display_name || 'Seeker'}, your contribution of <strong>₹{customAmount || amount}</strong> for <em>{initiative}</em> has been offered to Shri Krishna Gaushala.
+            </p>
+            <div className="badge-gold my-2">
+              Contribution Ref: {receiptId}
+            </div>
+            <p className="text-xs text-text-muted">
+              Your contribution is recorded in your Devotee Profile. A receipt is issued once payment is confirmed.
+            </p>
+            <button className="btn-primary mt-4" onClick={onClose}>
+              Done
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
+            <div>
+              <label className="text-xs font-semibold uppercase text-muted tracking-wider block mb-1">
+                Select Initiative
+              </label>
+              <select
+                className="form-input w-full"
+                value={campaignId}
+                onChange={(e) => setCampaignId(e.target.value)}
               >
-                {!success ? (
-                  <>
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-tulsi-light text-tulsi flex items-center justify-center">
-                          <HeartHandshake size={20} />
-                        </div>
-                        <Dialog.Title className="font-serif text-xl font-semibold text-text-primary m-0">Sponsor Gau Seva</Dialog.Title>
-                      </div>
-                      <Dialog.Close asChild>
-                        <button className="p-2 rounded-full hover:bg-surface-subtle text-text-muted transition-colors"><X size={20} /></button>
-                      </Dialog.Close>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Donation Amount (₹)</label>
-                        <select className="w-full bg-surface-subtle border border-border rounded-xl px-4 py-3.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-tulsi/50 focus:border-tulsi" value={amount} onChange={(e) => setAmount(e.target.value)}>
-                          <option value="1100">₹1,100 - 1 Day Fodder Seva</option>
-                          <option value="2100">₹2,100 - Medical Seva</option>
-                          <option value="5100">₹5,100 - 1 Month Adoption</option>
-                          <option value="11000">₹11,000 - Maha Seva</option>
-                        </select>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-text-muted uppercase tracking-wider pl-1">Dedication / Message (Optional)</label>
-                        <textarea className="w-full bg-surface-subtle border border-border rounded-xl px-4 py-3.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-tulsi/50 focus:border-tulsi min-h-[100px]" placeholder="e.g., In loving memory of..." value={dedication} onChange={(e) => setDedication(e.target.value)} />
-                      </div>
-
-                      <Button type="submit" disabled={loading} className="w-full py-6 rounded-xl font-semibold bg-tulsi hover:bg-tulsi text-white shadow-lg shadow-tulsi/20 mt-2">
-                        {loading ? <Loader2 className="animate-spin w-5 h-5" /> : `Proceed to Pay ₹${amount}`}
-                      </Button>
-                    </form>
-                  </>
-                ) : (
-                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center text-center py-8">
-                    <div className="w-20 h-20 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-6">
-                      <FileCheck size={40} />
-                    </div>
-                    <h3 className="font-serif text-2xl font-semibold text-text-primary mb-2">Seva Accepted</h3>
-                    <p className="text-text-secondary mb-8 leading-relaxed">Your sacred offering has been received. The Gaushala caretakers express their deep gratitude.</p>
-                    <Button onClick={closeAndReset} className="w-full rounded-full">Return to Sanctuary</Button>
-                  </motion.div>
+                {(campaigns ?? []).map((c) => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+                {(!campaigns || campaigns.length === 0) && (
+                  <option value="">General Gaushala Seva</option>
                 )}
-              </motion.div>
-            </Dialog.Content>
-          </Dialog.Portal>
+              </select>
+              {activeCampaign?.description && (
+                <p className="text-xs text-text-muted mt-1.5">{activeCampaign.description}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold uppercase text-muted tracking-wider block mb-1">
+                Select Contribution Amount (₹)
+              </label>
+              <div className="donation-amount-grid">
+                {presetAmounts.map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    className={`amount-chip ${amount === amt && !customAmount ? 'active' : ''}`}
+                    onClick={() => { setAmount(amt); setCustomAmount(''); }}
+                  >
+                    ₹{amt.toLocaleString()}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="number"
+                placeholder="Or enter custom amount in Rupees"
+                className="form-input w-full mt-2"
+                value={customAmount}
+                onChange={(e) => { setCustomAmount(e.target.value); }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Dedication / Sankalpa Note (Optional)</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. In memory of Late Sh. Ram Lal, or for family wellbeing"
+                value={dedication}
+                onChange={(e) => setDedication(e.target.value)}
+              />
+            </div>
+
+            {error && (
+              <div className="flex items-start gap-2 text-sm text-[#a43d2e] bg-[#fdf0ed] border border-[#f3c9bf] rounded-lg px-3 py-2.5" role="alert">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              className="btn-primary w-full mt-3"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Offering Seva...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  <span>Offer Seva (₹{customAmount || amount})</span>
+                </>
+              )}
+            </button>
+          </form>
         )}
-      </AnimatePresence>
-    </Dialog.Root>
+      </div>
+    </div>
   );
 }
