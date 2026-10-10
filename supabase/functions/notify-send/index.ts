@@ -73,15 +73,15 @@ const TEMPLATES: Record<string, (d: Record<string, string>) => { subject: string
       ${cta('See My Recommended Pujas', SITE_URL + '/pujas')}`),
   }),
   referral_credited: (d) => ({
-    subject: `+108 Punya — ${d.referredName} joined through your invite`,
+    subject: `+108 Seva Credits — ${d.referredName} joined through your invite`,
     html: emailShell(`
-      <h2 style="color:#3d2c1e;margin:0 0 12px">Punya earned 🪷</h2>
+      <h2 style="color:#3d2c1e;margin:0 0 12px">Seva Credits earned 🪷</h2>
       <p style="color:#5d4a3a;font-size:14px;line-height:1.7">${d.name}, <strong>${d.referredName}</strong> just joined Pratha using your Dharma Mitra referral code.</p>
       <div style="background:#f7efe3;border-radius:12px;padding:14px 18px;margin:12px 0;text-align:center">
         <div style="font-size:26px;color:#a04b2a;font-weight:bold">${d.punyaTotal}</div>
-        <div style="font-size:12px;color:#5d4a3a">total Punya points · tier: <strong>${d.tier}</strong></div>
+        <div style="font-size:12px;color:#5d4a3a">total Seva Credits · tier: <strong>${d.tier}</strong></div>
       </div>
-      <p style="color:#5d4a3a;font-size:14px;line-height:1.7">Every devotee you bring earns you <strong>+108 Punya</strong>. Keep sharing — the next milestone tier awaits.</p>
+      <p style="color:#5d4a3a;font-size:14px;line-height:1.7">Every devotee you bring earns you <strong>+108 Seva Credits</strong>. Keep sharing — the next milestone tier awaits.</p>
       ${cta('Share Your Code Again', SITE_URL + '/profile?tab=referral')}`),
   }),
 };
@@ -285,11 +285,11 @@ Deno.serve(async (req) => {
         tier: tierFor(count ?? 1),
       });
       // In-app first — notification lands even if email/push fail.
-      await notifyInApp(ref.referrer_user_id, 'referral_credited', '+108 Punya earned 🪷',
+      await notifyInApp(ref.referrer_user_id, 'referral_credited', '+108 Seva Credits earned 🪷',
         `${referred?.display_name || 'A devotee'} joined Pratha through your invite`, { route: '/profile?tab=referral' });
       let emailError: string | null = null;
       try { await sendResend(resendKey, to, t.subject, t.html); } catch (e) { emailError = String(e); console.error('resend:', e); }
-      await sendPushToUser(ref.referrer_user_id, '+108 Punya earned 🪷',
+      await sendPushToUser(ref.referrer_user_id, '+108 Seva Credits earned 🪷',
         `${referred?.display_name || 'A devotee'} joined Pratha through your invite`, undefined, '/profile?tab=referral');
       await markSent(ref.referrer_user_id, `referral:${ref.id}`, { referred_user_id: ref.referred_user_id });
       return json({ ok: true, email_error: emailError });

@@ -108,7 +108,7 @@ export function Home() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-text-primary">Dharma Mitra Referral</span>
-              <span className="badge-tulsi text-[10px] py-0 px-1.5">+108 Punya</span>
+              <span className="badge-tulsi text-[10px] py-0 px-1.5">+108 Seva Credits</span>
             </div>
             <p className="text-[11px] text-text-muted mt-0.5">Invite family &amp; friends to earn sacred Seva merits</p>
           </div>

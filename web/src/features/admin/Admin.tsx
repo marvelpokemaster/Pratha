@@ -184,7 +184,7 @@ export function Admin() {
             </div>
             <div className="glass-card p-4 rounded-2xl border border-border-subtle bg-surface">
               <div className="text-2xl font-bold text-text-primary">{(biz?.punyaIssued ?? 0).toLocaleString()}</div>
-              <div className="text-xs text-text-muted mt-0.5">Punya issued</div>
+              <div className="text-xs text-text-muted mt-0.5">Seva Credits issued</div>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

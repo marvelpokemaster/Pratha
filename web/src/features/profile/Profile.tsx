@@ -288,7 +288,7 @@ export function Profile() {
             {[
               { label: 'Seva Offered', value: `₹${totalContributions.toLocaleString('en-IN')}`, sub: `${donations.length} contribution${donations.length === 1 ? '' : 's'}` },
               { label: 'Pujas Booked', value: bookings.length, sub: 'sankalpas in your name' },
-              { label: 'Punya Earned', value: referralStats.punyaPoints, sub: `${referralStats.tierName} · ${referralStats.invitedCount} invited` },
+              { label: 'Seva Credits', value: referralStats.punyaPoints, sub: `${referralStats.tierName} · ${referralStats.invitedCount} invited` },
               { label: 'Sankalpa Family', value: family.length, sub: 'members included in prayers' },
               { label: 'Sadhana Streak', value: `${sadhana?.streak ?? 0} day${sadhana?.streak === 1 ? '' : 's'}`, sub: sadhana?.todayDone ? 'practiced today' : 'mark today to continue' },
             ].map((s) => (
@@ -573,13 +573,13 @@ export function Profile() {
                   <Sparkles size={12} />
                   <span>Dharma Mitra Program</span>
                 </div>
-                <h3 className="activity-meta-title text-lg font-serif">Invite Devotees &amp; Earn Punya</h3>
+                <h3 className="activity-meta-title text-lg font-serif">Invite Devotees &amp; Earn Seva Credits</h3>
                 <p className="activity-meta-sub">Share your sacred invite code to welcome family and friends to Pratha</p>
               </div>
 
               <div className="flex items-center gap-2 self-start sm:self-auto bg-surface-subtle border border-border-subtle px-3 py-1.5 rounded-full">
                 <Gift size={14} className="text-terracotta" />
-                <span className="text-xs font-semibold text-text-primary">+108 Punya / Invite</span>
+                <span className="text-xs font-semibold text-text-primary">+108 Seva Credits / Invite</span>
               </div>
             </div>
 
@@ -649,7 +649,7 @@ export function Profile() {
             </div>
 
             <div className="activity-item-card" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
-              <span className="text-xs text-text-muted uppercase font-semibold">Earned Punya Points</span>
+              <span className="text-xs text-text-muted uppercase font-semibold">Earned Seva Credits</span>
               <span className="font-serif text-2xl font-bold text-terracotta">
                 {referralStats.punyaPoints}
               </span>
@@ -687,9 +687,9 @@ export function Profile() {
 
               <div className="p-3 rounded-lg bg-surface-subtle border border-border-subtle">
                 <span className="w-6 h-6 rounded-full bg-terracotta text-white text-xs font-bold flex items-center justify-center mb-2">3</span>
-                <h5 className="font-semibold text-xs text-text-primary mb-1">Earn Punya &amp; Merits</h5>
+                <h5 className="font-semibold text-xs text-text-primary mb-1">Earn Seva Credits &amp; Merits</h5>
                 <p className="text-[11px] text-text-muted leading-relaxed">
-                  Receive 108 Punya points for every devotee who connects with sacred temple ceremonies and Gau Seva.
+                  Receive 108 Seva Credits for every devotee who connects with sacred temple ceremonies and Gau Seva.
                 </p>
               </div>
             </div>

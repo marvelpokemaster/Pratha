@@ -232,7 +232,7 @@ export function PujaDiscovery() {
               to="/profile?tab=referral"
               className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-terracotta hover:text-terracotta/80 transition-colors"
             >
-              <Share2 size={13} /> Gift a devotee +108 Punya — share Pratha
+              <Share2 size={13} /> Gift a devotee +108 Seva Credits — share Pratha
             </Link>
           </div>
         </motion.section>

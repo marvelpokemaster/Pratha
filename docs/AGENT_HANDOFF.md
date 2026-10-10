@@ -355,3 +355,6 @@ buttons that fail (N18). Not exercised live: F3 publish→broadcast + G3 heads-u
   versionCode 9 / versionName 1.1.9. Includes on-device QA fixes from commit 07aa9aa:
   event page 404 fix, DonationModal fixes, Home greeting, NotificationBell deep-links,
   push token RLS, notify-send opt-out, migrations 029/030/031.
+- **Terminology Update (2026-10-10)**: Replaced user-facing "Punya" / "Punya Points"
+  terminology with "Seva Credits" across Profile (Invite & Earn, Journey tabs), Home,
+  PujaDiscovery, Admin, and notify-send edge function templates.

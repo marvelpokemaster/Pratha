@@ -90,8 +90,8 @@ export function clearInboundReferral(): void {
 }
 
 /**
- * Returns referral points/stats (Punya points).
- * Each invited devotee earns 108 Punya points (sacred Vedic number).
+ * Returns referral points/stats (Seva Credits).
+ * Each invited devotee earns 108 Seva Credits (sacred Vedic number).
  */
 /**
  * Server-backed stats: counts rows in public.referrals where the user is the
@@ -185,7 +185,7 @@ export function getReferralStats(user?: User | null): {
     }
   }
 
-  // 108 Punya points per referral
+  // 108 Seva Credits per referral
   const punyaPoints = count * 108;
 
   let tierName = 'Dharma Pratham (Seeker)';
