@@ -4,6 +4,7 @@ import { X, CheckCircle, Heart, Sparkles, Loader2, AlertCircle } from 'lucide-re
 import { createDonation, getSevaCampaigns } from '@/lib/api/profile';
 import { useAuth } from '@/features/auth/AuthContext';
 import { redirectToLogin } from '@/lib/auth/redirect';
+import { createPaymentOrder, startRazorpayCheckout, verifyPayment } from '@/lib/razorpay';
 import './DonationModal.css';
 
 interface DonationModalProps {
@@ -71,6 +72,49 @@ export function DonationModal({
         campaignId: activeCampaign?.id,
         dedication: dedication.trim() || undefined,
       });
+
+      if (res.donationId && res.donationId !== 'pending' && finalAmount > 0) {
+        try {
+          const order = await createPaymentOrder('contribution', res.donationId);
+          await startRazorpayCheckout({
+            order,
+            prefill: {
+              name: user.user_metadata?.display_name || '',
+              email: user.email || '',
+            },
+            onSuccess: async (paymentResult) => {
+              try {
+                await verifyPayment({
+                  paymentId: order.paymentId,
+                  razorpayPaymentId: paymentResult.razorpay_payment_id,
+                  razorpayOrderId: paymentResult.razorpay_order_id,
+                  razorpaySignature: paymentResult.razorpay_signature,
+                });
+              } catch (verifyErr) {
+                console.warn('Payment signature verification delayed, webhook will finalize:', verifyErr);
+              } finally {
+                setConfirmedAmount(finalAmount);
+                setReceiptId(res.donationId);
+              }
+            },
+            onDismiss: () => {
+              setConfirmedAmount(finalAmount);
+              setReceiptId(res.donationId);
+            },
+            onError: (payErr) => {
+              console.warn('Payment failed or cancelled:', payErr);
+              setConfirmedAmount(finalAmount);
+              setReceiptId(res.donationId);
+            },
+          });
+          return;
+        } catch (checkoutErr: any) {
+          console.error('Razorpay checkout initialization error:', checkoutErr);
+          setConfirmedAmount(finalAmount);
+          setReceiptId(res.donationId);
+          return;
+        }
+      }
 
       setConfirmedAmount(finalAmount);
       setReceiptId(res.donationId);

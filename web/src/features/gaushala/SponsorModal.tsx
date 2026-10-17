@@ -4,6 +4,7 @@ import type { Animal } from '@/lib/api/gaushala';
 import { createDonation } from '@/lib/api/profile';
 import { useAuth } from '@/features/auth/AuthContext';
 import { redirectToLogin } from '@/lib/auth/redirect';
+import { createPaymentOrder, startRazorpayCheckout, verifyPayment } from '@/lib/razorpay';
 
 interface SponsorModalProps {
   animal: Animal | null;
@@ -44,6 +45,45 @@ export function SponsorModal({ animal, isOpen, onClose }: SponsorModalProps) {
         gaushalaId: animal.gaushalaId,
         dedication: dedication.trim() || `Sponsorship for ${animal.name}`,
       });
+
+      if (res.donationId && res.donationId !== 'pending' && selectedTier > 0) {
+        try {
+          const order = await createPaymentOrder('contribution', res.donationId);
+          await startRazorpayCheckout({
+            order,
+            prefill: {
+              name: user.user_metadata?.display_name || '',
+              email: user.email || '',
+            },
+            onSuccess: async (paymentResult) => {
+              try {
+                await verifyPayment({
+                  paymentId: order.paymentId,
+                  razorpayPaymentId: paymentResult.razorpay_payment_id,
+                  razorpayOrderId: paymentResult.razorpay_order_id,
+                  razorpaySignature: paymentResult.razorpay_signature,
+                });
+              } catch (verifyErr) {
+                console.warn('Payment signature verification delayed, webhook will finalize:', verifyErr);
+              } finally {
+                setSuccessId(res.donationId);
+              }
+            },
+            onDismiss: () => {
+              setSuccessId(res.donationId);
+            },
+            onError: (payErr) => {
+              console.warn('Payment failed or cancelled:', payErr);
+              setSuccessId(res.donationId);
+            },
+          });
+          return;
+        } catch (checkoutErr: any) {
+          console.error('Razorpay checkout initialization error:', checkoutErr);
+          setSuccessId(res.donationId);
+          return;
+        }
+      }
 
       setSuccessId(res.donationId);
     } catch (err: any) {

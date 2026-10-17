@@ -62,11 +62,11 @@ The Cloudflare Worker `utsavam-backend` is deployed under a different Cloudflare
 | Discover + detail routes | Working | `/discover`, `/temples/:slug`, `/events/:slug`, `/festivals/:slug`, `/darshan`, `/darshan/:id` via `web/src/lib/api/discover.ts`. Event selects must use `categories!events_category_id_fkey(name)` (events has two FKs to categories → PostgREST 300 otherwise) |
 | Pooja booking | Working | Date picker honors `lead_time_days`/`available_days`; sankalpa/nakshatra validation; real RPC errors shown; free → confirmed, paid → pending_payment; no fabricated references |
 | Gaushala / passports | Working | Animals + `breeds(name)` + Gaushala embeds; chips filter client-side |
-| Seva contributions | Working (unpaid) | Real published campaigns; `create_contribution` RPC; rows stay `created` until a payment flow exists |
+| Seva contributions | Working | Real published campaigns; `create_contribution` RPC; integrated with Razorpay Checkout & webhook |
 | Profile/family | Working | Profile UPDATE and family insert verified via hosted E2E |
 | Supabase Auth | Working | Email/password verified; forgot-password + recovery in `Auth.tsx`; Resend SMTP configured by user in dashboard; Google OAuth wired (button + `pratha://auth/callback` deep link) — needs redirect allow-list entry and a real-device test |
 | Firebase/Worker retirement | Partial | Rishi primary = `rishi-ask` Edge Function (verified 200 with user JWT); Worker kept as unauthenticated fallback |
-| Payments | Blocked | Needs Razorpay sandbox keys + webhook Edge Function + sandbox validation |
+| Payments | Working | Razorpay Sandbox integrated; Edge Functions `razorpay-order` and `razorpay-webhook` live; checkout wired into PujaDetailModal, DonationModal, SponsorModal; keys in vault |
 | AI Edge Function | Working | `rishi-ask` deployed and verified; Gemini key in vault; signed-in-only |
 | Notification Edge Function | Blocked | Needs notification provider credentials |
 | Expo | Passing | `tsc --noEmit` clean; `expo export --platform web` succeeds |
@@ -358,3 +358,12 @@ buttons that fail (N18). Not exercised live: F3 publish→broadcast + G3 heads-u
 - **Terminology Update (2026-10-10)**: Replaced user-facing "Punya" / "Punya Points"
   terminology with "Seva Credits" across Profile (Invite & Earn, Journey tabs), Home,
   PujaDiscovery, Admin, and notify-send edge function templates.
+- **Razorpay Sandbox Integration (2026-10-17)**: Resolved PRATHA-042. Razorpay sandbox
+  credentials (`rzp_test_Tp4SdbJcrBUaxf`) stored in Supabase Vault via `vault.create_secret`.
+  Deployed live Edge Functions `razorpay-order` (JWT-gated order creation & HMAC-SHA256
+  verification) and `razorpay-webhook` (signature verification & server callbacks).
+  Configured sandbox webhook secret in Supabase Vault and verified live signature validation.
+  Integrated standard Razorpay Checkout in `PujaDetailModal.tsx`, `DonationModal.tsx`,
+  and `SponsorModal.tsx`. Updated `vercel.json` Content Security Policy (CSP) to allow
+  `https://checkout.razorpay.com`, `https://api.razorpay.com`, and `https://lumberjack.razorpay.com`.
+

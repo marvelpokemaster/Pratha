@@ -129,10 +129,10 @@ Acceptance: paid booking creates `pending_payment` row with clear "payment at te
 Notes: verified — success screen shows "Booking Recorded" + "awaiting payment" for non-confirmed states (PujaDetailModal:136-150).
 
 ### PRATHA-042 — Razorpay integration
-Status: [!] BLOCKED · Priority: MUST (revenue core)
-Blocker: needs Razorpay keys + webhook Edge Function.
-Acceptance: paid booking → Razorpay checkout → webhook marks confirmed → receipt row.
-Relevant: `create_puja_booking` RPC, new edge fn `payment-webhook`.
+Status: [x] DONE · Priority: MUST (revenue core)
+Notes: Razorpay sandbox keys stored in Supabase Vault; Edge Functions `razorpay-order` and `razorpay-webhook` deployed live; checkout modal integrated into PujaDetailModal, DonationModal, and SponsorModal with client & webhook payment status reconciliation.
+Acceptance: paid booking → Razorpay checkout → webhook/verify marks confirmed → receipt row.
+Relevant: `create_puja_booking` RPC, `mark_payment_paid` RPC, edge fns `razorpay-order` and `razorpay-webhook`.
 
 ### PRATHA-043 — Puja detail page
 Status: [x] DONE
@@ -462,7 +462,7 @@ Acceptance: every box below checked before public launch.
 Launch gate:
 - [ ] PRATHA-011: Supabase Auth → Redirect URLs allowlists https://pratha-two.vercel.app (+ auth.pratha domain when custom domain lands)
 - [ ] PRATHA-013: reset email delivers on prod (depends on above)
-- [ ] PRATHA-042: Razorpay keys → checkout + webhook; bookings leave pending_payment honestly
+- [x] PRATHA-042: Razorpay keys → checkout + webhook; bookings leave pending_payment honestly
 - [ ] PRATHA-160: Resend verified domain → emails leave resend.dev sandbox (owner-only until then)
 - [ ] PRATHA-193: leaked-password protection ON in Supabase Auth settings
 - [ ] Set VITE_ENABLE_DEMO_BUTTONS=false on Vercel

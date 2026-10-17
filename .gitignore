@@ -24,7 +24,8 @@ backend/.env
 .vscode/
 *.zip
 backend/.venv/
-backend/__pycache__/
+**/__pycache__/
+*.pyc
 
 .firebase/
 firebase-debug.log

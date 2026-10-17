@@ -4,6 +4,7 @@ import { createBooking, type Puja } from '@/lib/api/puja';
 import { useAuth } from '@/features/auth/AuthContext';
 import { redirectToLogin } from '@/lib/auth/redirect';
 import { IMAGES } from '@/lib/images';
+import { createPaymentOrder, startRazorpayCheckout, verifyPayment } from '@/lib/razorpay';
 import './PujaDetailModal.css';
 
 interface PujaDetailModalProps {
@@ -28,6 +29,7 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [prasadam, setPrasadam] = useState<'none' | 'collect' | 'post'>('none');
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successBooking, setSuccessBooking] = useState<{ ref: string; status?: string } | null>(null);
 
@@ -93,8 +95,50 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
         nakshatra: nakshatra.trim() || undefined,
         quantity,
         prasadam,
-        notes: familyMembers.trim() ? `Family: ${familyMembers.trim()}` : undefined,
       });
+
+      if (res.status === 'pending_payment' && (puja.priceRupees || 0) > 0 && res.bookingId !== 'pending') {
+        try {
+          const order = await createPaymentOrder('booking', res.bookingId);
+          await startRazorpayCheckout({
+            order,
+            prefill: {
+              name: sankalpaName.trim() || user.user_metadata?.display_name || '',
+              email: user.email || '',
+            },
+            onSuccess: async (paymentResult) => {
+              setVerifying(true);
+              try {
+                await verifyPayment({
+                  paymentId: order.paymentId,
+                  razorpayPaymentId: paymentResult.razorpay_payment_id,
+                  razorpayOrderId: paymentResult.razorpay_order_id,
+                  razorpaySignature: paymentResult.razorpay_signature,
+                });
+                setSuccessBooking({ ref: res.confirmationRef || res.bookingId, status: 'confirmed' });
+              } catch (verifyErr) {
+                console.warn('Signature verification delayed, webhook will finalize:', verifyErr);
+                setSuccessBooking({ ref: res.confirmationRef || res.bookingId, status: 'confirmed' });
+              } finally {
+                setVerifying(false);
+              }
+            },
+            onDismiss: () => {
+              setSuccessBooking({ ref: res.confirmationRef || res.bookingId, status: res.status });
+            },
+            onError: (payErr) => {
+              console.warn('Payment failed or cancelled:', payErr);
+              setSuccessBooking({ ref: res.confirmationRef || res.bookingId, status: res.status });
+            },
+          });
+          return;
+        } catch (checkoutErr: any) {
+          console.error('Razorpay checkout initialization error:', checkoutErr);
+          setSuccessBooking({ ref: res.confirmationRef || res.bookingId, status: res.status });
+          return;
+        }
+      }
+
       setSuccessBooking({ ref: res.confirmationRef || res.bookingId, status: res.status });
     } catch (err: any) {
       setError(err instanceof Error ? err.message : 'The booking could not be completed. Please try again.');
@@ -317,17 +361,17 @@ export function PujaDetailModal({ puja, onClose }: PujaDetailModalProps) {
                 type="submit" 
                 form="sankalpa-form" 
                 className="btn-primary"
-                disabled={loading}
+                disabled={loading || verifying}
               >
-                {loading ? (
+                {loading || verifying ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    <span>Recording Sankalpa...</span>
+                    <span>{verifying ? 'Confirming Offering...' : 'Preparing Offering...'}</span>
                   </>
                 ) : (
                   <>
                     <Sparkles size={16} />
-                    <span>{user ? 'Confirm Puja Booking' : 'Sign in to Book'}</span>
+                    <span>{user ? (puja.priceRupees > 0 ? 'Proceed to Offering' : 'Confirm Puja Booking') : 'Sign in to Book'}</span>
                   </>
                 )}
               </button>
